@@ -1,0 +1,30 @@
+// Rules for the AppShell component that Bootstrap has no utility for.
+
+// Clip a transformed drawer that would otherwise widen the page. `clip` does
+// not create a scroll container, so the sticky header keeps working.
+html {
+  overflow-x: clip;
+}
+
+// Flex children default to min-width: auto, which lets a wide table stretch
+// the page; tables scroll inside .table-responsive instead.
+.min-w-0 {
+  min-width: 0 !important;
+}
+
+// Opaque, so the page does not show through the open drawer.
+#primary-nav.primary-nav {
+  background-color: var(--bs-body-bg) !important;
+}
+
+// Menu items read larger than Bootstrap's 1rem default against the drawer.
+#primary-nav .nav-link {
+  font-size: 1.125rem;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--bs-border-radius);
+}
+
+.dui-brand-sub {
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}

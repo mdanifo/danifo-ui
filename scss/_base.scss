@@ -1,0 +1,37 @@
+// danifo.dev base theme. An app sets only what makes it itself, then imports
+// this file instead of Bootstrap:
+//
+//   $primary: #1c7c54;                 // finance pine; workout uses #2563eb
+//   @import "@danifo/ui/scss/base";
+//
+// Every variable here is !default, so an app value set before the import wins.
+
+$font-family-sans-serif: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif !default;
+$font-family-monospace: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !default;
+
+$primary: #2563eb !default;
+$danger: #c02626 !default;
+$warning: #b45309 !default;
+
+$body-bg: #ffffff !default;
+$body-color: #16191d !default;
+$body-secondary-color: #5b6672 !default;
+$body-secondary-bg: #f7f8fa !default;
+$body-tertiary-bg: #eef1f5 !default;
+$border-color: rgba(22, 25, 29, 0.14) !default;
+
+$body-bg-dark: #12141a !default;
+$body-color-dark: #e8eaf0 !default;
+$body-secondary-color-dark: #9aa4b2 !default;
+$body-secondary-bg-dark: #1a1d25 !default;
+$body-tertiary-bg-dark: #232733 !default;
+$border-color-dark: rgba(232, 234, 240, 0.16) !default;
+
+$border-radius: 0.875rem !default;
+
+// Narrower than Bootstrap's 400px so the backdrop stays clickable to the right
+// of the drawer on a phone (the menu closes on an outside click).
+$offcanvas-horizontal-width: 280px !default;
+
+@import "bootstrap/scss/bootstrap";
+@import "shell";
