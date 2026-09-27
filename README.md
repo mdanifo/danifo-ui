@@ -15,7 +15,7 @@ one Bootstrap 5.3 base theme and the React pieces the apps were duplicating.
 ## Use it from an app
 
 ```bash
-npm i github:mdanifo/danifo-ui#v0.2.0   # built on install by the `prepare` script
+npm i github:mdanifo/danifo-ui#v0.2.1   # built on install by the `prepare` script
 # or, from a sibling checkout under ~/code:
 # npm i file:../../danifo-ui
 ```
