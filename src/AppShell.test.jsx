@@ -31,11 +31,60 @@ describe("AppShell", () => {
     render(<Harness />);
     expect(isOpen()).toBe(false);
     const header = document.querySelector("header");
-    expect(header.firstElementChild).toHaveClass("navbar-brand");
+    expect(header.firstElementChild).toHaveClass("navbar-brand", "dui-brand-link");
     const end = header.querySelector(".dui-header-end");
     expect(end).toHaveClass("ms-auto");
     expect(end.lastElementChild).toHaveClass("menu-button");
     expect(screen.getByRole("link", { name: "Finance home" })).toHaveAttribute("href", "#budget");
+  });
+
+  it("makes the brand a home link, optionally with a logo image", () => {
+    render(
+      <AppShell
+        brand="Jobs"
+        homeHref="/overview"
+        brandImage={{ src: "/logo.svg", alt: "" }}
+        renderNav={() => null}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    const home = screen.getByRole("link", { name: "Jobs home" });
+    expect(home).toHaveAttribute("href", "/overview");
+    expect(home.querySelector("img.dui-brand-image")).toHaveAttribute("src", "/logo.svg");
+  });
+
+  it("lets an app override the accessible home label (e.g. emoji in the brand)", () => {
+    render(
+      <AppShell
+        brand="Finance 💚"
+        brandAriaLabel="Finance, danifo.dev — home"
+        homeHref="#budget/planner"
+        renderNav={() => null}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    expect(screen.getByRole("link", { name: "Finance, danifo.dev — home" })).toHaveAttribute(
+      "href",
+      "#budget/planner",
+    );
+  });
+
+  it("passes href and aria-label into renderBrandLink for react-router apps", () => {
+    render(
+      <AppShell
+        brand="Workout"
+        homeHref="/schedules"
+        renderBrandLink={({ className, children, href, "aria-label": label }) => (
+          <a className={className} href={href} aria-label={label}>{children}</a>
+        )}
+        renderNav={() => null}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    expect(screen.getByRole("link", { name: "Workout home" })).toHaveAttribute("href", "/schedules");
   });
 
   it("opens on the hamburger and closes on a choice, Escape, a click outside, and the close button", async () => {
