@@ -1,8 +1,10 @@
 # Handoff: move the danifo.dev dashboards onto @danifo/ui (for Cursor)
 
 **Owner decision (2026-09-27):** one shared UI library for every danifo.dev
-page. This repo is set up (v0.1.0). The work left is to finish extracting the
-shared pieces and move both dashboards onto it. Read `README.md` first.
+page. This repo is set up (v0.2.0). Finance and workout are on the library
+locally via `file:` deps; tag a release and switch CI to
+`github:mdanifo/danifo-ui#v0.2.0` once private-repo access is decided. Read
+`README.md` first.
 
 ## Where things stand
 
@@ -11,14 +13,14 @@ shared pieces and move both dashboards onto it. Read `README.md` first.
 | This library | `mdanifo/danifo-ui` (private) | `~/code/danifo-ui` | tag `vX.Y.Z` |
 | Finance | `mdanifo/personal-finance-tracker` | `frontend/` | push to `main` → CI → auto-deploy |
 | Workout | `mdanifo/workout-tracker` | `dashboard/frontend/` | PR → `dashboard-ci.yml` → merge → `dashboard-deploy.yml` |
+| Flights | `mdanifo/flight-price-alerter` | `frontend/` | custom CSS + bottom nav today — not on Bootstrap yet |
+| Watch | `mdanifo/watch-suggestions` | `frontend/` | custom CSS + bottom nav today — not on Bootstrap yet |
 
-Both dashboards are React 19 + Vite + Bootstrap 5.3 (react-bootstrap in
-finance). As of 2026-09-27 both use the same shell: a header with the hamburger
-at the upper left, and one offcanvas drawer hidden by default at every width.
-Each app has its own copy of that code, which is the duplication this library
-removes.
+Finance and workout are React 19 + Vite + Bootstrap 5.3 (react-bootstrap) and
+share `AppShell` from this library. Flight and watch still use a custom token
+sheet and a bottom nav; adopt Bootstrap + this library in a later pass.
 
-**Already in v0.1.0**
+**In v0.2.0**
 
 - `scss/_base.scss`: the base theme, with every variable `!default`. It covers
   fonts, the light and dark palette, radii and the 280px drawer.
@@ -28,13 +30,18 @@ removes.
   exact ids and classes both apps' tests select on: `#primary-nav`,
   `.primary-nav`, `.menu-button`, `.nav-link`, `.app-header`, `.app-main`, and
   the "Open menu" / "Close menu" / "Close" labels.
+- `PageHeader`, `Eyebrow`, `Panel`, `Kpis` / `Kpi`, `DataTable`, `Foot`,
+  `CenterState`, `DeltaBadge`, `BarRow`, `num`, `toneClass`.
+- `configureTheme` / `initTheme` / `ThemeToggle` (system / light / dark, stored
+  per app, resolved to `data-bs-theme`).
 - `usd`, `usd0`, `usdRange`.
 
 ## Decide first: private repo access
 
 The repo is **private**, and both apps install it with `npm ci` in GitHub
 Actions (the workout dashboard also builds a Docker image). A private git
-dependency needs credentials there. Pick one before migrating anything:
+dependency needs credentials there. Pick one before cutting the tagged release
+apps pin in CI:
 
 1. **Make the repo public (recommended).** It holds a theme and UI code, with
    no secrets or data, and it removes every CI and Docker auth problem.
@@ -46,62 +53,43 @@ dependency needs credentials there. Pick one before migrating anything:
 
 Ask the owner which. Do not make the repo public without that answer.
 
-## Work to do
+Local checkouts under `~/code` use `file:../../danifo-ui` (finance) /
+`file:../../../danifo-ui` (workout) so `npm ci` works without GitHub auth.
 
-### 1. Library v0.2.0: extract what both apps duplicate
+## Done (v0.2.0 + app wiring)
 
-From finance `frontend/src/ui.jsx`:
+### Library v0.2.0
 
-- `PageHeader`, `Eyebrow`, `Panel`, `Kpis` / `Kpi`, `DataTable`, `Foot`
-- `CenterState`, `DeltaBadge`, `BarRow`, and the `num` class string
+Extracted the shared chrome and theme from finance / workout. Each extracted
+component has a Vitest test. Version is `0.2.0`.
 
-From workout `dashboard/frontend/src`:
+### Finance onto the library
 
-- `theme.js` + `ThemeToggle.jsx` (system / light / dark, stored per app,
-  resolved to `data-bs-theme`). Finance has no toggle today; offer it
-  there, off by default.
+- Depends on `@danifo/ui` (`file:` locally).
+- `src/theme.scss`: finance variables, then `@import "@danifo/ui/scss/base"`.
+- `App.jsx` `Shell` → `AppShell` (brand "Finance 💚", home `#budget/planner`).
+- `src/ui.jsx` deleted; imports come from `@danifo/ui`.
+- ThemeToggle not shown (off by default); `configureTheme` + `initTheme` still
+  run so system preference paints `data-bs-theme`.
 
-Keep app-specific things in the apps: finance's budget status colours and
-markers, the charts, workout's day tiles and log weight boxes. Add a test for
-each extracted component. Release `v0.2.0`.
+### Workout onto the library
 
-### 2. Finance onto the library
+- Same dependency. `theme.scss` keeps `$primary` and chart/series variables,
+  then imports the base. `custom.css` rules pinned by contract tests stay.
+- `Shell.jsx` → `AppShell` with react-router `NavLink`s; ThemeToggle + athlete
+  chip as `headerActions`.
+- Contract tests assert shell/theme behaviour against the library files where
+  the rules moved.
 
-- `npm i github:mdanifo/danifo-ui#v0.2.0`.
-- `src/theme.scss`: keep only finance's variables (`$primary`/`$success`
-  `#1c7c54`, `$danger` `#b6502f`, `$secondary` `#2e4756`, Newsreader headings,
-  Source Code Pro mono), then `@import "@danifo/ui/scss/base"`. Keep the
-  finance-only rules (status select colours, `.tax-total`, chart variables)
-  after it.
-- `App.jsx` `Shell`: replace with `AppShell` (brand "Finance 💚", home
-  `#budget/planner`, `routeKey={section}`, month picker and provider badge as
-  `headerActions`). Budget stays the home page.
-- Replace `src/ui.jsx` imports with `@danifo/ui`; delete what moved.
-- Verify with `npm run build`, `pytest tests/browser -q` (Playwright against the
-  fake server, **never** finance.danifo.dev), then `pytest -q` and
-  `ruff check pfrs tests poc scripts`.
+## Still to do
 
-### 3. Workout onto the library
-
-- Same dependency. `src/styles/theme.scss`: keep `$primary #2563eb` and workout's
-  chart and series variables, then import the base. Keep `custom.css` rules
-  pinned by `global.contract.test.js` and `logLoads.test.js`.
-- `components/Shell.jsx` → `AppShell`, with react-router `NavLink`s in
-  `renderNav` (call `close` on click) and `renderBrandLink` returning a
-  `NavLink` to `/schedules`. Use `routeKey={location.pathname}`. Keep the
-  ThemeToggle and athlete chip as `headerActions`.
-- `npm test` (Vitest) and `npm run build` must pass. Update the contract tests
-  that read `theme.scss` / `Shell.jsx` so they assert the same things against
-  the library's files or the rendered DOM.
-- Ship as a PR with screenshots.
-
-### 4. Tidy up
-
-Once both apps depend on the library:
-
-- delete the duplicated shell and helpers from each app;
-- add one line to each app's docs pointing here;
-- note the library in finance `CLAUDE.md` (Commands section).
+- Decide public vs private (above), tag `v0.2.0`, switch app deps from `file:`
+  to `github:mdanifo/danifo-ui#v0.2.0`.
+- Verify finance with `pytest tests/browser -q` (never finance.danifo.dev),
+  `pytest -q`, and `ruff check`.
+- Ship workout as a PR with screenshots.
+- Later: move flight and watch onto Bootstrap + this library (they still use a
+  custom CSS shell today).
 
 ## Behaviour that must survive (each broke once)
 
