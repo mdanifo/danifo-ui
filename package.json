@@ -1,6 +1,6 @@
 {
   "name": "@danifo/ui",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "private": true,
   "description": "Shared look, feel and shell for the danifo.dev dashboards (Bootstrap 5.3 + React).",
   "type": "module",
