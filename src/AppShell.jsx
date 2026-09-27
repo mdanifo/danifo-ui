@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 
 /**
- * The danifo.dev app shell: a header with the brand on the left and the
- * hamburger at the upper right (page content is left-justified, so the menu
- * control stays out of the reading column). Every section lives in one drawer
- * that slides in from the right, hidden until the hamburger opens it, at every
- * width. An always-open desktop sidebar took a fixed column from every page,
- * so there is none.
+ * The danifo.dev app shell: brand on the left; theme controls and the hamburger
+ * grouped on the right (page content is left-justified, so the menu stays out
+ * of the reading column). Every section lives in one drawer that slides in from
+ * the right, hidden until the hamburger opens it, at every width. An
+ * always-open desktop sidebar took a fixed column from every page, so there is
+ * none.
  *
  * Router-agnostic: the app renders its own links through `renderNav(close)`
  * (NavLink for react-router, plain anchors for a hash router) and calls
@@ -49,7 +49,9 @@ export default function AppShell({
       <span className="dui-brand-sub text-uppercase text-body-secondary">{brandSub}</span>
     </>
   );
-  const brandClass = "navbar-brand d-flex flex-column py-0 me-auto text-body text-decoration-none";
+  // No me-auto here: the right cluster uses ms-auto so the hamburger cannot
+  // end up on the left if a navbar utility reshuffles flex children.
+  const brandClass = "navbar-brand d-flex flex-column py-0 me-0 text-body text-decoration-none";
 
   return (
     <div className="dui-shell min-vh-100">
@@ -67,7 +69,7 @@ export default function AppShell({
       </nav>
 
       <div className="d-flex flex-column min-vh-100">
-        <header className="app-header navbar sticky-top bg-body border-bottom px-2 px-lg-3">
+        <header className="app-header navbar sticky-top bg-body border-bottom px-2 px-lg-3 flex-nowrap">
           {renderBrandLink
             ? renderBrandLink({ className: brandClass, children: brandBody })
             : (
@@ -75,17 +77,19 @@ export default function AppShell({
                 {brandBody}
               </a>
             )}
-          <div className="d-flex align-items-center gap-2">{headerActions}</div>
-          <button
-            type="button"
-            className="menu-button navbar-toggler border-0 ms-2"
-            aria-label={open ? "Close menu" : "Open menu"}
-            aria-expanded={open}
-            aria-controls="primary-nav"
-            onClick={() => setOpen((o) => !o)}
-          >
-            <span className="navbar-toggler-icon" />
-          </button>
+          <div className="dui-header-end ms-auto d-flex align-items-center gap-2">
+            {headerActions}
+            <button
+              type="button"
+              className="menu-button navbar-toggler border-0"
+              aria-label={open ? "Close menu" : "Open menu"}
+              aria-expanded={open}
+              aria-controls="primary-nav"
+              onClick={() => setOpen((o) => !o)}
+            >
+              <span className="navbar-toggler-icon" />
+            </button>
+          </div>
         </header>
         <main className="app-main flex-grow-1 min-w-0">{children}</main>
       </div>

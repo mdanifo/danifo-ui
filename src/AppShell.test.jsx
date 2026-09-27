@@ -27,12 +27,14 @@ const nav = () => screen.getByRole("navigation", { name: "Primary", hidden: true
 const isOpen = () => nav().classList.contains("show");
 
 describe("AppShell", () => {
-  it("starts closed, with the hamburger at the upper right after the brand and actions", () => {
+  it("starts closed, with the hamburger in a right-side cluster after the brand", () => {
     render(<Harness />);
     expect(isOpen()).toBe(false);
     const header = document.querySelector("header");
-    expect(header.lastElementChild).toHaveClass("menu-button");
     expect(header.firstElementChild).toHaveClass("navbar-brand");
+    const end = header.querySelector(".dui-header-end");
+    expect(end).toHaveClass("ms-auto");
+    expect(end.lastElementChild).toHaveClass("menu-button");
     expect(screen.getByRole("link", { name: "Finance home" })).toHaveAttribute("href", "#budget");
   });
 

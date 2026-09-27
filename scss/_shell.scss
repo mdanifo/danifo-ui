@@ -28,3 +28,16 @@ html {
   font-size: 0.72rem;
   letter-spacing: 0.04em;
 }
+
+// Keep the brand on the left and the menu cluster on the right even if an app
+// restyles .navbar. The hamburger is the last child of .dui-header-end.
+.app-header.navbar {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.app-header .dui-header-end {
+  margin-left: auto;
+}
