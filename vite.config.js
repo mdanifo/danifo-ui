@@ -6,7 +6,15 @@ export default defineConfig({
   plugins: [react()],
   build: {
     lib: { entry: "src/index.js", formats: ["es"], fileName: () => "index.js" },
-    rollupOptions: { external: ["react", "react-dom", "react/jsx-runtime"] },
+    rollupOptions: {
+      external: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "react-bootstrap",
+        /^react-bootstrap\//,
+      ],
+    },
     sourcemap: true,
   },
   test: { environment: "jsdom", setupFiles: ["src/test-setup.js"] },
