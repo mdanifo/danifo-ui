@@ -1,28 +1,25 @@
 import React, { useEffect, useState } from "react";
 
 /**
- * The danifo.dev app shell: brand on the left; theme controls and the hamburger
- * grouped on the right (page content is left-justified, so the menu stays out
- * of the reading column). Every section lives in one drawer that slides in from
- * the right, hidden until the hamburger opens it, at every width. An
- * always-open desktop sidebar took a fixed column from every page, so there is
- * none.
+ * The danifo.dev app shell: brand on the left (always a link home — text and/or
+ * an optional logo image); theme controls and the hamburger grouped on the
+ * right. Every section lives in one drawer that slides in from the right,
+ * hidden until the hamburger opens it, at every width.
  *
- * Router-agnostic: the app renders its own links through `renderNav(close)`
- * (NavLink for react-router, plain anchors for a hash router) and calls
- * `close` when one is chosen. The drawer also closes on Escape, on a click
- * outside it, on its close button, and whenever `routeKey` changes (the back
- * button, a deep link).
+ * Home link contract: set `homeHref` (hash or path). For react-router, pass
+ * `renderBrandLink` that returns a NavLink using the provided `href` /
+ * `aria-label`. Do not render the brand as plain text — it is how people go
+ * home.
  *
- * One node driven by this component's own state, not react-bootstrap's
- * Offcanvas: that component portals a second element with the same id while
- * the first is still closing, so the closed drawer is briefly two elements and
- * one stays visible. Bootstrap's .offcanvas is hidden (visibility as well as
- * off-screen) until .show, so a closed drawer's links cannot take focus.
+ * Router-agnostic nav: the app renders links through `renderNav(close)` and
+ * calls `close` when one is chosen. The drawer also closes on Escape, on a
+ * click outside it, on its close button, and whenever `routeKey` changes.
  */
 export default function AppShell({
   brand,
   brandSub = "danifo.dev",
+  brandImage = null,
+  brandAriaLabel,
   homeHref = "/",
   renderBrandLink,
   renderNav,
@@ -43,15 +40,54 @@ export default function AppShell({
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
+  const homeLabel = brandAriaLabel ?? `${brand} home`;
+
+  let image = null;
+  if (typeof brandImage === "string" && brandImage) {
+    image = <img src={brandImage} alt="" className="dui-brand-image" />;
+  } else if (brandImage && typeof brandImage === "object" && brandImage.src) {
+    image = (
+      <img
+        src={brandImage.src}
+        alt={brandImage.alt ?? ""}
+        className="dui-brand-image"
+        width={brandImage.width}
+        height={brandImage.height}
+      />
+    );
+  } else if (brandImage) {
+    image = brandImage;
+  }
+
   const brandBody = (
     <>
-      <span className="fw-bold lh-sm">{brand}</span>
-      <span className="dui-brand-sub text-uppercase text-body-secondary">{brandSub}</span>
+      {image}
+      <span className="dui-brand-text d-flex flex-column">
+        <span className="fw-bold lh-sm">{brand}</span>
+        {brandSub ? (
+          <span className="dui-brand-sub text-uppercase text-body-secondary">{brandSub}</span>
+        ) : null}
+      </span>
     </>
   );
-  // No me-auto here: the right cluster uses ms-auto so the hamburger cannot
-  // end up on the left if a navbar utility reshuffles flex children.
-  const brandClass = "navbar-brand d-flex flex-column py-0 me-0 text-body text-decoration-none";
+  // Row layout when a logo sits beside the wordmark.
+  const brandClass = [
+    "navbar-brand",
+    "dui-brand-link",
+    "d-flex",
+    image ? "flex-row align-items-center gap-2" : "flex-column",
+    "py-0",
+    "me-0",
+    "text-body",
+    "text-decoration-none",
+  ].join(" ");
+
+  const brandLinkProps = {
+    className: brandClass,
+    children: brandBody,
+    href: homeHref,
+    "aria-label": homeLabel,
+  };
 
   return (
     <div className="dui-shell min-vh-100">
@@ -71,9 +107,9 @@ export default function AppShell({
       <div className="d-flex flex-column min-vh-100">
         <header className="app-header navbar sticky-top bg-body border-bottom px-2 px-lg-3 flex-nowrap">
           {renderBrandLink
-            ? renderBrandLink({ className: brandClass, children: brandBody })
+            ? renderBrandLink(brandLinkProps)
             : (
-              <a className={brandClass} href={homeHref} aria-label={`${brand} home`}>
+              <a className={brandClass} href={homeHref} aria-label={homeLabel}>
                 {brandBody}
               </a>
             )}
