@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Form from "react-bootstrap/Form";
+import { Form } from "react-bootstrap";
 import { THEMES, readStoredTheme, setTheme } from "./theme.js";
 
 const LABELS = {
