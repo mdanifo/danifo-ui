@@ -7,7 +7,7 @@ one Bootstrap 5.3 base theme and the React pieces the apps were duplicating.
 | | |
 |---|---|
 | `scss/_base.scss` | The base theme: fonts, palette (light + dark), radii, drawer width. An app sets its accent (`$primary`) and imports this instead of Bootstrap. |
-| `AppShell` | Header with the hamburger at the upper left; every section in one drawer, hidden until opened, at every width. Closes on a choice, Escape, a click outside, its close button, and route changes. Router-agnostic. |
+| `AppShell` | Header with the brand on the left and the hamburger at the upper right; every section in one drawer that slides in from the right, hidden until opened, at every width. Closes on a choice, Escape, a click outside, its close button, and route changes. Router-agnostic. |
 | `PageHeader`, `Eyebrow`, `Panel`, `Kpis`/`Kpi`, `DataTable`, `Foot`, `CenterState`, `DeltaBadge`, `BarRow`, `num` | Common page chrome shared by the finance dashboard (and available to the others). |
 | `configureTheme` / `initTheme` / `ThemeToggle` | System / light / dark, stored per app, resolved to `data-bs-theme`. Offer the toggle where you want it; omit it to leave system as the only mode. |
 | `usd`, `usd0`, `usdRange` | Money formatting; ranges never wrap at the dash. |

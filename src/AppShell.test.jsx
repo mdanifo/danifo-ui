@@ -27,11 +27,12 @@ const nav = () => screen.getByRole("navigation", { name: "Primary", hidden: true
 const isOpen = () => nav().classList.contains("show");
 
 describe("AppShell", () => {
-  it("starts closed, with the hamburger in the header before the brand", () => {
+  it("starts closed, with the hamburger at the upper right after the brand and actions", () => {
     render(<Harness />);
     expect(isOpen()).toBe(false);
     const header = document.querySelector("header");
-    expect(header.firstElementChild).toHaveClass("menu-button");
+    expect(header.lastElementChild).toHaveClass("menu-button");
+    expect(header.firstElementChild).toHaveClass("navbar-brand");
     expect(screen.getByRole("link", { name: "Finance home" })).toHaveAttribute("href", "#budget");
   });
 
@@ -65,6 +66,12 @@ describe("AppShell", () => {
     await user.click(screen.getByRole("button", { name: "Open menu" }));
     rerender(<Harness routeKey="b" />);
     expect(isOpen()).toBe(false);
+  });
+
+  it("renders the drawer from the right, so it opens toward the hamburger", () => {
+    render(<Harness />);
+    expect(nav()).toHaveClass("offcanvas-end");
+    expect(nav()).not.toHaveClass("offcanvas-start");
   });
 
   it("renders the nav once, so a closing drawer cannot leave a second copy", () => {
