@@ -65,3 +65,105 @@ html {
 .app-header .dui-header-end {
   margin-left: auto;
 }
+
+// Sidebar layout. Below lg the nav is the same drawer as the default layout
+// (.offcanvas-lg keeps the drawer chrome there). From lg it is a static
+// column: .offcanvas-lg assigns no width, so the column gets one here, and it
+// runs the full viewport height beside the page with its own scrollbar.
+@include media-breakpoint-up(lg) {
+  .dui-shell-sidebar #primary-nav.dui-sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 220px;
+    flex: 0 0 220px;
+    overflow-y: auto;
+    border-right: 1px solid var(--bs-border-color);
+  }
+
+  .dui-shell-sidebar #primary-nav.dui-sidebar .offcanvas-body {
+    flex-direction: column;
+    padding: 1rem 0.75rem;
+  }
+
+  .dui-shell-sidebar #primary-nav .nav-link {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+  }
+}
+
+// Bottom tab bar for phones: fixed, opaque, above the page, with room for a
+// home indicator. Hidden from lg up (d-lg-none on the element).
+$dui-tabbar-height: 3.75rem;
+
+.dui-tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: $zindex-sticky;
+  display: flex;
+  align-items: stretch;
+  height: calc(#{$dui-tabbar-height} + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  background-color: var(--bs-body-bg);
+  border-top: 1px solid var(--bs-border-color);
+}
+
+.dui-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--bs-secondary-color);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  line-height: 1.1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dui-tab:hover,
+.dui-tab:focus-visible {
+  color: var(--bs-body-color);
+  text-decoration: none;
+}
+
+.dui-tab:focus-visible {
+  outline: 2px solid var(--bs-primary);
+  outline-offset: -2px;
+  border-radius: 0.5rem;
+}
+
+.dui-tab.active {
+  color: var(--bs-primary);
+}
+
+.dui-tab-icon {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 1.15rem;
+}
+
+.dui-tab-label {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// The page must not end under the bar.
+@include media-breakpoint-down(lg) {
+  .app-main.dui-has-tabbar {
+    padding-bottom: calc(#{$dui-tabbar-height} + env(safe-area-inset-bottom));
+  }
+}
