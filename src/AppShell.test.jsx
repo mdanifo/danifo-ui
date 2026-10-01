@@ -6,7 +6,7 @@ import AppShell from "./AppShell.jsx";
 
 const SECTIONS = ["Budget", "Payoff", "Taxes"];
 
-function Harness({ routeKey = "a" }) {
+function Harness({ routeKey = "a", ...rest }) {
   return (
     <AppShell
       brand="Finance"
@@ -17,6 +17,7 @@ function Harness({ routeKey = "a" }) {
           <a key={s} href={`#${s}`} className="nav-link" onClick={close}>{s}</a>
         ))}
       headerActions={<span>badge</span>}
+      {...rest}
     >
       <p>page</p>
     </AppShell>
@@ -128,5 +129,78 @@ describe("AppShell", () => {
   it("renders the nav once, so a closing drawer cannot leave a second copy", () => {
     render(<Harness />);
     expect(document.querySelectorAll("#primary-nav")).toHaveLength(1);
+  });
+
+  it("keeps the default layout a drawer at every width, with no tab bar", () => {
+    render(<Harness />);
+    expect(nav()).toHaveClass("offcanvas");
+    expect(nav()).not.toHaveClass("offcanvas-lg");
+    expect(document.querySelector(".dui-shell")).not.toHaveClass("dui-shell-sidebar");
+    expect(screen.getByRole("button", { name: "Open menu" })).not.toHaveClass("d-lg-none");
+    expect(document.querySelector(".dui-tabbar")).toBeNull();
+    expect(document.querySelector("main")).not.toHaveClass("dui-has-tabbar");
+  });
+});
+
+describe("AppShell sidebar layout", () => {
+  it("is a drawer below lg and a static column from lg, where the hamburger hides", async () => {
+    const user = userEvent.setup();
+    render(<Harness layout="sidebar" />);
+    // Bootstrap's responsive offcanvas: drawer chrome below lg, in flow from lg.
+    expect(nav()).toHaveClass("offcanvas-lg", "offcanvas-end", "dui-sidebar");
+    expect(document.querySelector(".dui-shell")).toHaveClass("dui-shell-sidebar", "d-lg-flex");
+    expect(nav().querySelector(".offcanvas-header")).toHaveClass("d-lg-none");
+    expect(screen.getByRole("button", { name: "Open menu" })).toHaveClass("d-lg-none");
+    // The drawer behaviour is unchanged where it still applies.
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(isOpen()).toBe(true);
+    expect(document.querySelector(".offcanvas-backdrop")).toHaveClass("d-lg-none");
+    await user.click(screen.getByRole("link", { name: "Payoff" }));
+    expect(isOpen()).toBe(false);
+  });
+
+  it("puts the nav before the page in the DOM, so it reads first and sits on the left", () => {
+    render(<Harness layout="sidebar" />);
+    const shell = document.querySelector(".dui-shell");
+    expect(shell.children[0]).toBe(nav());
+    expect(shell.children[1].querySelector("main")).not.toBeNull();
+  });
+});
+
+describe("AppShell tab bar", () => {
+  const tabs = () =>
+    ["Today", "History"].map((t) => (
+      <a key={t} href={`#${t}`} className="dui-tab">
+        <span className="dui-tab-icon" aria-hidden="true">•</span>
+        <span className="dui-tab-label">{t}</span>
+      </a>
+    ));
+
+  it("renders the given tabs plus More, and pads the page for the bar", () => {
+    render(<Harness renderTabs={tabs} />);
+    const bar = screen.getByRole("navigation", { name: "Main pages" });
+    expect(bar).toHaveClass("dui-tabbar", "d-lg-none");
+    expect(bar.querySelectorAll(".dui-tab")).toHaveLength(3);
+    expect(screen.getByRole("link", { name: "Today" })).toHaveAttribute("href", "#Today");
+    expect(document.querySelector("main")).toHaveClass("dui-has-tabbar");
+  });
+
+  it("More opens the drawer, mirrors its state, and the drawer closes as usual", async () => {
+    const user = userEvent.setup();
+    render(<Harness renderTabs={tabs} />);
+    const more = screen.getByRole("button", { name: /More: open the full menu/ });
+    expect(more).toHaveAttribute("aria-expanded", "false");
+    await user.click(more);
+    expect(isOpen()).toBe(true);
+    expect(more).toHaveAttribute("aria-expanded", "true");
+    expect(more).toHaveClass("active");
+    await user.click(screen.getByRole("link", { name: "Taxes" }));
+    expect(isOpen()).toBe(false);
+    expect(more).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("takes a custom More label", () => {
+    render(<Harness renderTabs={tabs} moreLabel="Menu" />);
+    expect(screen.getByRole("button", { name: /Menu: open the full menu/ })).toHaveTextContent("Menu");
   });
 });
