@@ -52,12 +52,14 @@ test.describe("the tab bar on a phone", () => {
     await expect(more(page)).toHaveAttribute("aria-expanded", "true");
     await expect(more(page)).toHaveClass(/\bactive\b/);
     await expect(hamburger(page)).toHaveAttribute("aria-expanded", "true");
+    await expect(drawer(page)).toBeFocused();
 
     await drawer(page).getByRole("link", { name: "Long page" }).click();
     await expectDrawerClosed(page);
     await expect(heading(page)).toHaveText("A long page");
     await expect(more(page)).toHaveAttribute("aria-expanded", "false");
     await expect(more(page)).not.toHaveClass(/\bactive\b/);
+    await expect(more(page)).toBeFocused();
     await expect(tabbar(page)).toBeVisible();
   });
 });

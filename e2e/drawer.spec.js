@@ -9,6 +9,7 @@ import {
   hamburger,
   heading,
   homeLink,
+  lineCount,
   sidewaysOverflow,
 } from "./helpers.js";
 
@@ -77,20 +78,36 @@ test.describe("the drawer layout on a phone", () => {
     await expectDrawerClosed(page);
   });
 
-  test("closes on its close button, and from the keyboard on the hamburger again", async ({ page }) => {
+  test("closes on its close button, handing focus back to the hamburger", async ({ page }) => {
     await hamburger(page).click();
     await expectDrawerOpen(page);
     await drawer(page).getByRole("button", { name: "Close" }).click();
     await expectDrawerClosed(page);
+    await expect(hamburger(page)).toBeFocused();
+  });
 
-    // The open drawer slides over the hamburger (280px of a 390px screen), so a
-    // second tap lands on the drawer's own close button; the hamburger still
-    // has focus, though, and keeps toggling from the keyboard.
+  test("moves focus onto the drawer when it opens, and back to the opener when it closes", async ({ page }) => {
+    // The open drawer slides over the hamburger (280px of a 390px screen), so
+    // focus has to travel with it: onto the drawer, then its close button and
+    // links, and back to the hamburger once it closes.
     await hamburger(page).click();
     await expectDrawerOpen(page);
-    await expect(hamburger(page)).toBeFocused();
-    await page.keyboard.press("Enter");
+    await expect(drawer(page)).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(drawer(page).getByRole("button", { name: "Close" })).toBeFocused();
+    await page.keyboard.press("Tab");
+    await expect(drawer(page).getByRole("link", { name: "Home" })).toBeFocused();
+    await page.keyboard.press("Escape");
     await expectDrawerClosed(page);
+    await expect(hamburger(page)).toBeFocused();
+
+    // Back on the hamburger, the keyboard keeps toggling it.
+    await page.keyboard.press("Enter");
+    await expectDrawerOpen(page);
+    await expect(drawer(page)).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expectDrawerClosed(page);
+    await expect(hamburger(page)).toBeFocused();
   });
 
   test("closes when the route changes underneath it (the back button)", async ({ page }) => {
@@ -153,9 +170,17 @@ test.describe("nothing scrolls sideways at 390px", () => {
 
   test("a money range moves as one word, where a plain dash would let it break", async ({ page }) => {
     await page.goto("/#/drawer/home");
-    const lines = (id) => page.getByTestId(id).evaluate((el) => el.getClientRects().length);
     await expect(page.getByTestId("range")).toHaveText("$13,955⁠–⁠14,556");
-    expect(await lines("range")).toBe(1);
-    expect(await lines("range-naive")).toBeGreaterThan(1);
+    expect(await lineCount(page.getByTestId("range"))).toBe(1);
+    expect(await lineCount(page.getByTestId("range-naive"))).toBeGreaterThan(1);
+  });
+
+  test("a KPI figure inside a Panel overflows its column rather than breaking mid-number", async ({ page }) => {
+    await page.goto("/#/drawer/home");
+    const figure = page.getByTestId("kpi-range").locator(".dui-kpi-value");
+    await expect(figure).toHaveText("$13,955⁠–⁠14,556");
+    await expect(figure).toHaveCSS("overflow-wrap", "normal");
+    expect(await lineCount(figure)).toBe(1);
+    expect(await sidewaysOverflow(page)).toEqual([]);
   });
 });

@@ -207,6 +207,39 @@ describe("AppShell", () => {
     }
   });
 
+  it("moves focus onto the drawer when it opens, and back to the hamburger when it closes", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    expect(nav()).toHaveAttribute("tabindex", "-1");
+    await user.click(hamburger());
+    expect(nav()).toHaveFocus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
+    expect(hamburger()).toHaveFocus();
+
+    await user.click(hamburger());
+    expect(nav()).toHaveFocus();
+    await user.click(screen.getByRole("link", { name: "Taxes" }));
+    expect(isOpen()).toBe(false);
+    expect(hamburger()).toHaveFocus();
+
+    await user.click(hamburger());
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(hamburger()).toHaveFocus();
+  });
+
+  it("leaves focus where an app put it while the drawer was open", async () => {
+    const user = userEvent.setup();
+    render(<Harness headerActions={<input aria-label="Search" />} />);
+    await user.click(hamburger());
+    expect(nav()).toHaveFocus();
+    const search = screen.getByRole("textbox", { name: "Search" });
+    search.focus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
+    expect(search).toHaveFocus();
+  });
+
   it("closes when the route changes underneath it (back button, deep link)", async () => {
     const user = userEvent.setup();
     const { rerender } = render(<Harness routeKey="a" />);
@@ -308,10 +341,24 @@ describe("AppShell tab bar", () => {
     expect(isOpen()).toBe(true);
     expect(more).toHaveAttribute("aria-expanded", "true");
     expect(more).toHaveClass("active");
+    expect(nav()).toHaveFocus();
     await user.click(screen.getByRole("link", { name: "Taxes" }));
     expect(isOpen()).toBe(false);
     expect(more).toHaveAttribute("aria-expanded", "false");
     expect(more).not.toHaveClass("active");
+    expect(more).toHaveFocus();
+  });
+
+  it("copes with the opener disappearing while the drawer is open", async () => {
+    const user = userEvent.setup();
+    const { rerender } = render(<Harness renderTabs={tabs} />);
+    await user.click(screen.getByRole("button", { name: /More: open the full menu/ }));
+    expect(nav()).toHaveFocus();
+    rerender(<Harness renderTabs={null} />);
+    expect(screen.queryByRole("button", { name: /More: open the full menu/ })).toBeNull();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
+    expect(hamburger()).not.toHaveFocus();
   });
 
   it("More and the hamburger drive the same drawer", async () => {

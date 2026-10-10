@@ -116,7 +116,7 @@ describe("Kpis / Kpi", () => {
   it("renders a plain value without a tone or hint", () => {
     render(<Kpi label="Net" value="$0" />);
     const value = screen.getByText("$0");
-    expect(value).toHaveClass("fs-5", "font-monospace");
+    expect(value).toHaveClass("dui-kpi-value", "fs-5", "font-monospace");
     expect(value).not.toHaveClass("text-success");
     expect(value).not.toHaveClass("text-danger");
     expect(value.parentElement.querySelector(".small")).toBeNull();

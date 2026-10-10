@@ -69,3 +69,12 @@ export function sidewaysOverflow(page) {
     return out;
   });
 }
+
+/** How many line boxes an element's text takes up (1: it never wrapped). */
+export function lineCount(locator) {
+  return locator.evaluate((el) => {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    return range.getClientRects().length;
+  });
+}

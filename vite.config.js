@@ -19,6 +19,9 @@ export default defineConfig({
   },
   test: {
     environment: "jsdom",
+    // One jsdom per worker instead of one per file: ~25-40% off the run, with
+    // per-file isolation kept. Fall back with `vitest run --pool=forks`.
+    pool: "vmThreads",
     setupFiles: ["src/test-setup.js"],
     // Only the unit and component tests; Playwright owns e2e/*.spec.js.
     include: ["src/**/*.test.{js,jsx}"],

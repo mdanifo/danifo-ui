@@ -41,6 +41,17 @@ export function HomePage({ layout }) {
         <Kpi label="Loans" value={usd0(-315713)} />
         <Kpi label="Net" value={usd0(-124126)} tone="neg" />
       </Kpis>
+      <Panel eyebrow="A figure in a panel" className="mt-3">
+        <p>
+          A Panel is a Bootstrap card, which breaks any word that cannot fit. A KPI figure is exempt: it
+          overflows its column rather than splitting mid-number.
+        </p>
+        <div className="row g-3">
+          <div className="col-auto" style={{ width: "8rem" }} data-testid="kpi-range">
+            <Kpi label="Projected" value={usdRange([13955.37, 14555.87])} />
+          </div>
+        </div>
+      </Panel>
       {/* Outside a Panel on purpose: Bootstrap's .card sets overflow-wrap:
           break-word, which force-breaks anything that cannot fit at all. */}
       <section className="mt-4" aria-label="Range">

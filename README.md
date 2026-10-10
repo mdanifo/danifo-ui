@@ -7,7 +7,7 @@ the React pieces the apps were duplicating.
 | | |
 |---|---|
 | `scss/_base.scss` | The base theme: fonts, palette (light + dark), radii, drawer width. An app sets its accent (`$primary`) and imports this instead of Bootstrap. |
-| `AppShell` | Brand (name and/or logo) on the left is **always a link home**; hamburger on the right opens a drawer from the right. Closes on a choice, Escape, outside click, close button, and route changes. `layout="sidebar"` makes the drawer a permanent left column from `lg`; `renderTabs` adds a phone bottom tab bar with a built-in **More** that opens the drawer (v0.3.0). |
+| `AppShell` | Brand (name and/or logo) on the left is **always a link home**; hamburger on the right opens a drawer from the right. Closes on a choice, Escape, outside click, close button, and route changes; opening moves focus onto the drawer and closing hands it back to the opener. `layout="sidebar"` makes the drawer a permanent left column from `lg`; `renderTabs` adds a phone bottom tab bar with a built-in **More** that opens the drawer (v0.3.0). |
 | `PageHeader`, `Eyebrow`, `Panel`, `Kpis`/`Kpi`, `DataTable`, `Foot`, `CenterState`, `DeltaBadge`, `BarRow`, `num` | Common page chrome. |
 | `configureTheme` / `initTheme` / `ThemeToggle` | System / light / dark, stored per app, resolved to `data-bs-theme`. |
 | `usd`, `usd0`, `usdRange` | Money formatting; ranges never wrap at the dash. |

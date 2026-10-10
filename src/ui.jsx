@@ -47,7 +47,7 @@ export function Kpi({ label, value, tone, hint }) {
   return (
     <div className="col">
       <Eyebrow>{label}</Eyebrow>
-      <div className={`fs-5 font-monospace ${toneClass(tone)}`}>{value}</div>
+      <div className={`dui-kpi-value fs-5 font-monospace ${toneClass(tone)}`}>{value}</div>
       {hint ? <div className="small text-body-secondary">{hint}</div> : null}
     </div>
   );

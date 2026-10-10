@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * The danifo.dev app shell: brand on the left (always a link home — text and/or
@@ -24,6 +24,10 @@ import { useCallback, useEffect, useState } from "react";
  * Router-agnostic nav: the app renders links through `renderNav(close)` and
  * calls `close` when one is chosen. The drawer also closes on Escape, on a
  * click outside it, on its close button, and whenever `routeKey` changes.
+ *
+ * Focus follows the drawer: opening it moves focus onto the drawer (the close
+ * button and the links are the next Tab stops), and closing it hands focus
+ * back to the button that opened it, as the drawer slides over that button.
  */
 export default function AppShell({
   brand,
@@ -41,10 +45,15 @@ export default function AppShell({
   children,
 }) {
   const [open, setOpen] = useState(false);
+  const navRef = useRef(null);
+  const openerRef = useRef(null);
   // Stable identities: `close` is handed to the app's renderNav on every
   // render, so an app can memoize its links on it.
   const close = useCallback(() => setOpen(false), []);
-  const toggle = useCallback(() => setOpen((o) => !o), []);
+  const toggle = useCallback((event) => {
+    openerRef.current = event.currentTarget;
+    setOpen((o) => !o);
+  }, []);
   const sidebar = layout === "sidebar";
   const hasTabs = typeof renderTabs === "function";
 
@@ -56,6 +65,20 @@ export default function AppShell({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (open) {
+      nav.focus({ preventScroll: true });
+      return;
+    }
+    const opener = openerRef.current;
+    openerRef.current = null;
+    if (!opener?.isConnected) return;
+    // Only when the drawer took focus with it; an app that moved focus itself
+    // (say, to a search field) keeps its choice.
+    const active = document.activeElement;
+    if (active === document.body || nav.contains(active)) opener.focus({ preventScroll: true });
   }, [open]);
 
   const homeLabel = brandAriaLabel ?? `${brand} home`;
@@ -121,7 +144,7 @@ export default function AppShell({
   return (
     <div className={`dui-shell min-vh-100${sidebar ? " dui-shell-sidebar d-lg-flex" : ""}`}>
       {open && <div className={`offcanvas-backdrop fade show${sidebar ? " d-lg-none" : ""}`} onClick={close} />}
-      <nav id="primary-nav" className={navClass} aria-label="Primary">
+      <nav id="primary-nav" ref={navRef} className={navClass} aria-label="Primary" tabIndex={-1}>
         <div className={`offcanvas-header border-bottom py-2${sidebar ? " d-lg-none" : ""}`}>
           <span className="fw-bold">{brand}</span>
           <button type="button" className="btn-close" aria-label="Close" onClick={close} />
