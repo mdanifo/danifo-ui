@@ -1,4 +1,3 @@
-import React from "react";
 import { Alert, Badge, Card, ProgressBar, Spinner, Table } from "react-bootstrap";
 
 /** Right-aligned monospace money. */
@@ -48,7 +47,7 @@ export function Kpi({ label, value, tone, hint }) {
   return (
     <div className="col">
       <Eyebrow>{label}</Eyebrow>
-      <div className={`fs-5 font-monospace ${toneClass(tone)}`}>{value}</div>
+      <div className={`dui-kpi-value fs-5 font-monospace ${toneClass(tone)}`}>{value}</div>
       {hint ? <div className="small text-body-secondary">{hint}</div> : null}
     </div>
   );
@@ -86,28 +85,27 @@ export function DeltaBadge({ pct }) {
   if (pct == null) {
     return <Badge bg="secondary-subtle" text="secondary-emphasis">new</Badge>;
   }
+  // Past half a percent the rounded figure is at least 1 either way, so the
+  // sign is always there to show.
   const r = Math.round(pct);
   if (pct > 0.5) {
-    return (
-      <Badge bg="danger-subtle" text="danger-emphasis">
-        {`${r > 0 ? "+" : ""}${r}%`}
-      </Badge>
-    );
+    return <Badge bg="danger-subtle" text="danger-emphasis">{`+${r}%`}</Badge>;
   }
   if (pct < -0.5) {
-    const text = `${r < 0 ? "−" : ""}${Math.abs(r)}%`;
-    return <Badge bg="success-subtle" text="success-emphasis">{text}</Badge>;
+    return <Badge bg="success-subtle" text="success-emphasis">{`−${-r}%`}</Badge>;
   }
   return <Badge bg="secondary-subtle" text="secondary-emphasis">—</Badge>;
 }
 
 export function BarRow({ label, amount, pct, extra, active = false }) {
+  // A missing or NaN share draws an empty bar instead of an invalid width.
+  const now = Number.isFinite(pct) ? Math.max(0, Math.min(100, pct)) : 0;
   return (
     <div className={`d-flex align-items-center gap-2 py-1 min-w-0 ${active ? "bg-success-subtle rounded px-2" : ""}`}>
       <div className="text-truncate flex-shrink-1" style={{ flexBasis: "7rem" }}>{label}</div>
       <div className="flex-grow-1 min-w-0">
         <ProgressBar
-          now={Math.max(0, Math.min(100, pct))}
+          now={now}
           variant={active ? "success" : "secondary"}
           style={{ height: 8 }}
           aria-hidden

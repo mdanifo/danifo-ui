@@ -56,9 +56,10 @@ export function resolveTheme(theme) {
 }
 
 export function applyTheme(theme, root) {
-  const element = root ?? document.documentElement;
   const choice = THEMES.includes(theme) ? theme : "system";
-  element.setAttribute("data-bs-theme", resolveTheme(choice));
+  // No document (server render, worker): nothing to paint yet, still a valid choice.
+  const element = root ?? (typeof document === "undefined" ? null : document.documentElement);
+  element?.setAttribute("data-bs-theme", resolveTheme(choice));
   return choice;
 }
 

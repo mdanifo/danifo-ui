@@ -66,6 +66,14 @@ html {
   margin-left: auto;
 }
 
+// A KPI figure (money, or a range joined so it cannot break at the dash) must
+// not be broken mid-number either. Bootstrap's .card sets overflow-wrap:
+// break-word, which splits "$13,955–14,556" anywhere once it cannot fit a
+// narrow column; let it overflow the column instead.
+.dui-kpi-value {
+  overflow-wrap: normal;
+}
+
 // Sidebar layout. Below lg the nav is the same drawer as the default layout
 // (.offcanvas-lg keeps the drawer chrome there). From lg it is a static
 // column: .offcanvas-lg assigns no width, so the column gets one here, and it
