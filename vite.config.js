@@ -17,5 +17,18 @@ export default defineConfig({
     },
     sourcemap: true,
   },
-  test: { environment: "jsdom", setupFiles: ["src/test-setup.js"] },
+  test: {
+    environment: "jsdom",
+    setupFiles: ["src/test-setup.js"],
+    // Only the unit and component tests; Playwright owns e2e/*.spec.js.
+    include: ["src/**/*.test.{js,jsx}"],
+    coverage: {
+      provider: "v8",
+      include: ["src/**/*.{js,jsx}"],
+      exclude: ["src/**/*.test.{js,jsx}", "src/test-setup.js"],
+      reporter: ["text", "html", "lcov"],
+      // Everything exported is small and deliberate; keep it fully covered.
+      thresholds: { statements: 100, branches: 100, functions: 100, lines: 100 },
+    },
+  },
 });

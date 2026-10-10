@@ -1,26 +1,39 @@
 {
   "name": "@danifo/ui",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "description": "Shared look, feel and shell for the danifo.dev dashboards (Bootstrap 5.3 + React).",
+  "repository": "github:mdanifo/danifo-ui",
   "type": "module",
   "main": "./dist/index.js",
   "exports": {
     ".": "./dist/index.js",
     "./scss/base": "./scss/_base.scss",
     "./scss/shell": "./scss/_shell.scss",
-    "./scss/*": "./scss/*"
+    "./scss/*": "./scss/*",
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "scss"
   ],
   "sideEffects": false,
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0"
+  },
   "scripts": {
     "build": "vite build",
     "prepare": "vite build",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "demo": "vite --config vite.demo.config.js",
+    "demo:build": "vite build --config vite.demo.config.js",
+    "demo:preview": "vite preview --config vite.demo.config.js",
+    "check:scss": "echo '$primary: #1c7c54; @import \"base\";' | sass --stdin --load-path=scss --load-path=node_modules --quiet-deps --silence-deprecation=import --no-source-map > /dev/null",
+    "check:pack": "node scripts/check-pack.mjs",
+    "check:consumer": "node scripts/check-consumer.mjs"
   },
   "peerDependencies": {
     "bootstrap": "^5.3.8",
@@ -29,10 +42,12 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.0",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.7",
     "@vitejs/plugin-react": "^6.1.1",
+    "@vitest/coverage-v8": "^5.0.3",
     "bootstrap": "^5.3.8",
     "jsdom": "^30.1.1",
     "react": "^19.3.0",

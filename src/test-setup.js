@@ -1,6 +1,9 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
 import { afterEach, beforeEach } from "vitest";
+import { DEFAULT_THEME_STORAGE_KEY, configureTheme } from "./theme.js";
+
+const hasDOM = typeof window !== "undefined";
 
 // jsdom does not implement matchMedia. Shared with the theme watcher so a test
 // can flip the color scheme and notify listeners.
@@ -11,7 +14,7 @@ function mediaMatches(query) {
   return false;
 }
 
-window.matchMedia = (query) => {
+if (hasDOM) window.matchMedia = (query) => {
   if (!mediaListeners.has(query)) mediaListeners.set(query, new Set());
   const listeners = mediaListeners.get(query);
   return {
@@ -38,7 +41,7 @@ window.matchMedia = (query) => {
   };
 };
 
-window.__notifyMedia = () => {
+if (hasDOM) window.__notifyMedia = () => {
   for (const [query, listeners] of mediaListeners) {
     const event = { matches: mediaMatches(query), media: query };
     listeners.forEach((fn) => fn(event));
@@ -46,6 +49,8 @@ window.__notifyMedia = () => {
 };
 
 beforeEach(() => {
+  configureTheme({ storageKey: DEFAULT_THEME_STORAGE_KEY });
+  if (!hasDOM) return;
   document.documentElement.removeAttribute("data-bs-theme");
   window.localStorage.clear();
   window.__prefersDark = false;

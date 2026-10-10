@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /**
  * The danifo.dev app shell: brand on the left (always a link home — text and/or
@@ -41,7 +41,10 @@ export default function AppShell({
   children,
 }) {
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
+  // Stable identities: `close` is handed to the app's renderNav on every
+  // render, so an app can memoize its links on it.
+  const close = useCallback(() => setOpen(false), []);
+  const toggle = useCallback(() => setOpen((o) => !o), []);
   const sidebar = layout === "sidebar";
   const hasTabs = typeof renderTabs === "function";
 
@@ -143,7 +146,7 @@ export default function AppShell({
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               aria-controls="primary-nav"
-              onClick={() => setOpen((o) => !o)}
+              onClick={toggle}
             >
               <span className="navbar-toggler-icon" />
             </button>
@@ -161,7 +164,7 @@ export default function AppShell({
             aria-label={`${moreLabel}: open the full menu`}
             aria-expanded={open}
             aria-controls="primary-nav"
-            onClick={() => setOpen((o) => !o)}
+            onClick={toggle}
           >
             <span className="dui-tab-icon" aria-hidden="true">
               <svg width="22" height="22" viewBox="0 0 22 22" fill="currentColor">

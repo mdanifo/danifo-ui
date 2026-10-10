@@ -1,0 +1,37 @@
+name: Release
+# Pushing a vX.Y.Z tag (see README "Release") publishes a GitHub Release with
+# the packed tarball attached, so an app can install the build instead of
+# building the library on every one of its own installs.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - name: The tag names the version in package.json
+        run: |
+          version="v$(node -p "require('./package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "::error::package.json says $version but the tag is $GITHUB_REF_NAME"
+            exit 1
+          fi
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npm run build
+      - run: npm run check:pack
+      - name: Pack
+        run: npm pack
+      - name: Publish the release with the tarball
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" ./*.tgz --verify-tag --title "$GITHUB_REF_NAME" --generate-notes

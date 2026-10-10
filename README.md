@@ -15,7 +15,12 @@ the React pieces the apps were duplicating.
 ## Use it from an app
 
 ```bash
-npm i github:mdanifo/danifo-ui#v0.3.0   # built on install by the `prepare` script
+# The build attached to the GitHub Release: nothing to compile on install.
+npm i https://github.com/mdanifo/danifo-ui/releases/download/v0.3.1/danifo-ui-0.3.1.tgz
+
+# Or straight from the tag: the `prepare` script runs `vite build` on install,
+# which means installing this repo's devDependencies too.
+npm i github:mdanifo/danifo-ui#v0.3.1
 ```
 
 ```scss
@@ -73,11 +78,25 @@ initTheme();
 
 ```bash
 npm ci
-npm test
+npm test               # unit + component tests (Vitest, jsdom)
+npm run test:coverage  # the same, failing under 100% on src/
+npm run test:e2e       # Playwright, in Chromium at 390px and 1280px (once: npx playwright install chromium)
+npm run demo           # the demo app behind the e2e suite, at http://localhost:5173
 npm run build
+npm run check:scss     # the base theme compiles with the sass CLI, the way an app imports it
+npm run check:pack     # the package ships dist/ and scss/, nothing else
+npm run check:consumer # the packed tarball imports and its SCSS compiles, as an app would use it
 ```
 
-Release: bump `version`, tag `vX.Y.Z`, push the tag; apps move by changing the
-`#vX.Y.Z` in their dependency. Never point an app at `#main`.
+`demo/` renders every layout and component on the real theme; the e2e suite
+checks the behaviour in `docs/HANDOFF.md` that must survive (closed drawer,
+nothing scrolling sideways at 390px, home links, both themes, money that does
+not wrap) in a real browser. CI runs all of the above on every push and pull
+request.
+
+Release: bump `version`, tag `vX.Y.Z`, push the tag. The Release workflow
+checks the tag against `package.json`, tests, builds, and publishes a GitHub
+Release with the packed tarball. Apps move by changing the version in their
+dependency. Never point an app at `#main`.
 
 The plan for moving dashboards onto this is in `docs/HANDOFF.md`.
