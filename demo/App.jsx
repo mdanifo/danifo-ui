@@ -96,7 +96,7 @@ export default function App() {
       brand="Danifo UI"
       brandSub="demo"
       brandImage={LOGO}
-      brandAriaLabel="Danifo UI demo — home"
+      brandAriaLabel="Danifo UI demo, home"
       homeHref={href(layout, "home")}
       layout={layout === "sidebar" ? "sidebar" : "drawer"}
       renderNav={renderNav}

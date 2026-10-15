@@ -37,7 +37,7 @@ html {
   flex: none;
 }
 
-// The wordmark / logo is always the home link — make that affordance obvious.
+// The brand is the home link; show that on hover and focus.
 .app-header a.dui-brand-link {
   min-width: 0;
 }
@@ -66,18 +66,15 @@ html {
   margin-left: auto;
 }
 
-// A KPI figure (money, or a range joined so it cannot break at the dash) must
-// not be broken mid-number either. Bootstrap's .card sets overflow-wrap:
-// break-word, which splits "$13,955–14,556" anywhere once it cannot fit a
-// narrow column; let it overflow the column instead.
+// Bootstrap's .card sets overflow-wrap: break-word, which would split a KPI
+// figure mid-number in a narrow column. Let it overflow instead.
 .dui-kpi-value {
   overflow-wrap: normal;
 }
 
-// Sidebar layout. Below lg the nav is the same drawer as the default layout
-// (.offcanvas-lg keeps the drawer chrome there). From lg it is a static
-// column: .offcanvas-lg assigns no width, so the column gets one here, and it
-// runs the full viewport height beside the page with its own scrollbar.
+// Sidebar layout. Below lg the nav is the same drawer (.offcanvas-lg keeps the
+// drawer chrome there). From lg it is a static column with its own scrollbar;
+// .offcanvas-lg assigns no width, so it gets one here.
 @include media-breakpoint-up(lg) {
   .dui-shell-sidebar #primary-nav.dui-sidebar {
     position: sticky;

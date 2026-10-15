@@ -1,7 +1,6 @@
 name: Release
-# Pushing a vX.Y.Z tag (see README "Release") publishes a GitHub Release with
-# the packed tarball attached, so an app can install the build instead of
-# building the library on every one of its own installs.
+# A vX.Y.Z tag publishes a GitHub Release with the packed tarball attached;
+# apps install that instead of building the library themselves.
 on:
   push:
     tags: ["v*"]
@@ -18,7 +17,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      - name: The tag names the version in package.json
+      - name: Tag matches package.json version
         run: |
           version="v$(node -p "require('./package.json').version")"
           if [ "$version" != "$GITHUB_REF_NAME" ]; then

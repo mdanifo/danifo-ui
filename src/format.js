@@ -1,9 +1,8 @@
 // Money formatting shared by the dashboards.
 //
-// `Number#toLocaleString` builds a new Intl.NumberFormat on every call, and
-// that construction is nearly all of its cost: a table with a few hundred money
-// cells pays it on every render. One cached formatter per style is ~70x faster
-// and produces the same text. Non-numbers keep the old toLocaleString path.
+// Building the Intl.NumberFormat is most of what `toLocaleString` costs, and a
+// table of money cells calls it per cell per render, so one formatter per
+// style is kept. Non-numbers (strings, bigints) go through toLocaleString.
 
 const USD = { style: "currency", currency: "USD", minimumFractionDigits: 2 };
 const USD0 = { style: "currency", currency: "USD", maximumFractionDigits: 0 };

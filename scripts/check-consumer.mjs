@@ -1,7 +1,6 @@
-// Install the packed tarball the way an app would and use it: the ESM entry
-// resolves against the peer dependencies (this is the class of bug fixed in
-// v0.2.1), and the SCSS base compiles through the package's own path with the
-// app's accent. Run after `npm run build`.
+// Install the packed tarball into a scratch app and use it: the ESM entry must
+// resolve against the peer dependencies, and the SCSS base must compile
+// through the package path with the app's accent. Run after `npm run build`.
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";

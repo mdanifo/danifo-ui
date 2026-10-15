@@ -24,6 +24,27 @@ test.describe("the tab bar on a phone", () => {
     expect(await sidewaysOverflow(page)).toEqual([]);
   });
 
+  test("tabs share the bar equally, and a long label truncates instead of widening its tab", async ({ page }) => {
+    const tabs = tabbar(page).locator(".dui-tab");
+    const bar = await tabbar(page).boundingBox();
+    const widths = () => tabs.evaluateAll((els) => els.map((el) => el.getBoundingClientRect().width));
+    expect(await widths()).toHaveLength(3);
+    for (const width of await widths()) expect(Math.abs(width - bar.width / 3)).toBeLessThan(1);
+
+    // Swap in a label that cannot fit a third of the screen. The tab must keep
+    // its share and clip the text, rather than growing to its content and
+    // pushing the bar past the viewport.
+    const label = tabs.nth(1).locator(".dui-tab-label");
+    await label.evaluate((el) => {
+      el.textContent = "A label far too long for a third of a phone screen";
+    });
+    await expect(label).toHaveCSS("text-overflow", "ellipsis");
+    const [scrollWidth, clientWidth] = await label.evaluate((el) => [el.scrollWidth, el.clientWidth]);
+    expect(scrollWidth).toBeGreaterThan(clientWidth);
+    for (const width of await widths()) expect(Math.abs(width - bar.width / 3)).toBeLessThan(1);
+    expect(await sidewaysOverflow(page)).toEqual([]);
+  });
+
   test("a tab navigates and takes the active colour", async ({ page }) => {
     await tabbar(page).getByRole("link", { name: "Components" }).click();
     await expect(page).toHaveURL(/#\/tabs\/components$/);

@@ -1,5 +1,5 @@
-// Exactly what an app does: set its accent, then import the base theme instead
-// of Bootstrap. (`@danifo/ui` resolves to this repo's scss/ via the demo's
+// What an app does: set its accent, then import the base theme in place of
+// Bootstrap. (`@danifo/ui` resolves to this repo's scss/ via the demo's
 // Vite alias.)
 $primary: #1c7c54;
 @import "@danifo/ui/scss/base";

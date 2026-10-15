@@ -19,17 +19,16 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      # --ignore-scripts: `prepare` would build the library during the install
-      # and the build step would build it again. One build, in the open, below.
+      # --ignore-scripts skips `prepare` (a vite build); the build step below does it once.
       - run: npm ci --ignore-scripts
-      - name: Unit and component tests, with the coverage threshold
+      - name: Unit tests with coverage
         run: npm run test:coverage
       - run: npm run build
-      - name: The SCSS base compiles against Bootstrap, the way an app imports it
+      - name: SCSS base compiles
         run: npm run check:scss
-      - name: The package ships dist/ and scss/, and nothing else
+      - name: Package contents
         run: npm run check:pack
-      - name: An app can import the packed tarball and compile its theme through it
+      - name: Consumer install from the tarball
         run: npm run check:consumer
 
   e2e:
@@ -55,7 +54,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - if: steps.browsers.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
-      - name: End-to-end tests against the demo, in Chromium at 390px and 1280px
+      - name: E2E against the demo
         run: npm run test:e2e
       - uses: actions/upload-artifact@v4
         if: failure()

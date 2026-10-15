@@ -126,7 +126,7 @@ export function ComponentsPage() {
       </Panel>
       <Panel eyebrow="States" alarm>
         <CenterState title="Loading" loading>
-          Reading the ledger…
+          Reading the ledger...
         </CenterState>
         <CenterState title="Failed" error>
           Could not reach the API.

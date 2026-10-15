@@ -3,8 +3,8 @@ import { defineConfig } from "@playwright/test";
 const PORT = 4173;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
-// A sandbox with a system Chromium (no download allowed) can point Playwright
-// at it; CI installs the matching browser instead and leaves this unset.
+// Optional path to a system Chromium, for a machine where Playwright's own
+// download is not an option. CI installs the matching browser and leaves it unset.
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
 
 export default defineConfig({

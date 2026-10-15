@@ -103,21 +103,22 @@ describe("AppShell", () => {
     expect(home).not.toHaveClass("flex-row");
   });
 
-  it("lets an app override the accessible home label (e.g. emoji in the brand)", () => {
+  it("uses the given accessible home label in place of the default", () => {
     render(
       <AppShell
-        brand="Finance 💚"
-        brandAriaLabel="Finance, danifo.dev — home"
+        brand="Finance"
+        brandAriaLabel="Finance, danifo.dev, home"
         homeHref="#budget/planner"
         renderNav={() => null}
       >
         <p>page</p>
       </AppShell>,
     );
-    expect(screen.getByRole("link", { name: "Finance, danifo.dev — home" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Finance, danifo.dev, home" })).toHaveAttribute(
       "href",
       "#budget/planner",
     );
+    expect(screen.queryByRole("link", { name: "Finance home" })).toBeNull();
   });
 
   it("passes href and aria-label into renderBrandLink for react-router apps", () => {
@@ -137,6 +138,27 @@ describe("AppShell", () => {
     expect(home).toHaveAttribute("href", "/schedules");
     expect(home).toHaveClass("navbar-brand", "dui-brand-link");
     expect(home).toHaveTextContent("Workout");
+  });
+
+  it("gives renderBrandLink the same brand body as the plain link: wordmark, sub-brand and logo", () => {
+    render(
+      <AppShell
+        brand="Workout"
+        brandImage="/logo.svg"
+        homeHref="/schedules"
+        renderBrandLink={({ className, children, href, "aria-label": label }) => (
+          <a className={className} href={href} aria-label={label}>{children}</a>
+        )}
+        renderNav={() => null}
+      >
+        <p>page</p>
+      </AppShell>,
+    );
+    const home = screen.getByRole("link", { name: "Workout home" });
+    expect(home.querySelector(".dui-brand-text .fw-bold")).toHaveTextContent("Workout");
+    expect(home.querySelector(".dui-brand-sub")).toHaveTextContent("danifo.dev");
+    expect(home.querySelector("img.dui-brand-image")).toHaveAttribute("src", "/logo.svg");
+    expect(home).toHaveClass("flex-row", "align-items-center");
   });
 
   it("links home to the site root unless told otherwise", () => {
@@ -225,6 +247,30 @@ describe("AppShell", () => {
 
     await user.click(hamburger());
     await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(hamburger()).toHaveFocus();
+  });
+
+  it("hands focus back to the opener after a click on the backdrop", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(hamburger());
+    expect(nav()).toHaveFocus();
+    // A click on the backdrop lands on nothing focusable, so focus has gone to
+    // body by the time the drawer closes.
+    await user.click(document.querySelector(".offcanvas-backdrop"));
+    expect(isOpen()).toBe(false);
+    expect(document.activeElement).not.toBe(document.body);
+    expect(hamburger()).toHaveFocus();
+  });
+
+  it("treats the button as the opener even when the click landed on its icon", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    await user.click(hamburger().querySelector(".navbar-toggler-icon"));
+    expect(isOpen()).toBe(true);
+    expect(nav()).toHaveFocus();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
     expect(hamburger()).toHaveFocus();
   });
 

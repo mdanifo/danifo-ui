@@ -3,12 +3,11 @@
  *
  * Bootstrap reads `data-bs-theme` and has no "system" value, so system is
  * resolved here to light or dark from `prefers-color-scheme`. An explicit
- * choice wins until the user goes back to system. Reading the stored value on
- * module load and applying it before React paints avoids a flash of the wrong
- * theme.
+ * choice wins until the user goes back to system. Call `initTheme()` before
+ * the first render to avoid a flash of the wrong theme.
  *
- * Each app calls `configureTheme({ storageKey })` once so preferences stay
- * per-app (e.g. "workout-dashboard:theme", "finance:theme").
+ * Each app calls `configureTheme({ storageKey })` once so preferences are
+ * stored per app ("workout-dashboard:theme", "finance:theme").
  */
 
 export const THEMES = ["system", "light", "dark"];

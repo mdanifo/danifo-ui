@@ -71,11 +71,12 @@ test.describe("the drawer layout on a phone", () => {
     await expectDrawerClosed(page);
   });
 
-  test("closes on a click outside it", async ({ page }) => {
+  test("closes on a click outside it, handing focus back to the hamburger", async ({ page }) => {
     await hamburger(page).click();
     await expectDrawerOpen(page);
     await page.mouse.click(40, 500);
     await expectDrawerClosed(page);
+    await expect(hamburger(page)).toBeFocused();
   });
 
   test("closes on its close button, handing focus back to the hamburger", async ({ page }) => {

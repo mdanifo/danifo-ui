@@ -1,14 +1,13 @@
 import { expect } from "@playwright/test";
 
-// The widths the dashboards are checked at: a 390px phone (the HANDOFF's
-// "nothing scrolls sideways at 390px") and a laptop past Bootstrap's lg.
+// Viewports the suite runs at: a 390px phone and a laptop past Bootstrap's lg.
 export const PHONE = { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true };
 export const DESKTOP = { viewport: { width: 1280, height: 800 } };
 
 export const drawer = (page) => page.locator("#primary-nav");
 export const hamburger = (page) => page.locator("button.menu-button");
 export const backdrop = (page) => page.locator(".offcanvas-backdrop");
-export const homeLink = (page) => page.getByRole("link", { name: "Danifo UI demo — home" });
+export const homeLink = (page) => page.getByRole("link", { name: "Danifo UI demo, home" });
 export const heading = (page) => page.getByRole("heading", { level: 1 });
 
 export async function expectDrawerClosed(page) {

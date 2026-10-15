@@ -8,10 +8,7 @@ const LABELS = {
   dark: "Dark",
 };
 
-/**
- * System / light / dark select. Off by default in apps that do not render it;
- * workout (and optionally finance) place it in AppShell `headerActions`.
- */
+/** System / light / dark select, sized for AppShell `headerActions`. */
 export default function ThemeToggle({ className = "theme-select w-auto" }) {
   const [theme, setThemeState] = useState(readStoredTheme);
 

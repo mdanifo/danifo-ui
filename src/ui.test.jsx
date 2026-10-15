@@ -161,9 +161,9 @@ describe("DataTable / Foot / num / toneClass", () => {
 
 describe("CenterState", () => {
   it("shows a spinner while loading and an alert on error", () => {
-    const { rerender } = render(<CenterState title="Reading…" loading />);
+    const { rerender } = render(<CenterState title="Reading..." loading />);
     expect(screen.getByRole("status")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Reading…" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Reading..." })).toBeInTheDocument();
 
     rerender(
       <CenterState title="Failed" error>

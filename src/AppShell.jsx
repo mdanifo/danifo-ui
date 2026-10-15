@@ -1,33 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
- * The danifo.dev app shell: brand on the left (always a link home — text and/or
- * an optional logo image); theme controls and the hamburger grouped on the
- * right. Every section lives in one drawer that slides in from the right.
+ * App shell for the danifo.dev dashboards: a sticky header with the brand on
+ * the left and the hamburger on the right, and one <nav> for all navigation.
  *
- * Two layouts:
- *   - "drawer" (default): the drawer is the only navigation, at every width.
- *   - "sidebar": from Bootstrap's lg breakpoint the same nav is a permanent
- *     left column and the hamburger disappears; below lg it is the drawer.
+ * `layout`: "drawer" (default) slides the nav in from the right at any width;
+ * "sidebar" makes it a permanent left column from Bootstrap's lg breakpoint
+ * and keeps the drawer below it. `renderTabs` adds a fixed bottom tab bar
+ * below lg, with a More button that opens the drawer; the main area is padded
+ * for the bar.
  *
- * An optional bottom tab bar for phones: pass `renderTabs()` returning the
- * links for the few pages used daily, and the shell renders them in a fixed
- * bar below lg with a "More" button that opens the drawer for the rest. The
- * main area takes the bar's height as bottom padding so nothing hides under
- * it.
+ * The brand is a link to `homeHref`. `renderBrandLink` lets a react-router app
+ * wrap the same props (className, children, href, aria-label) in a NavLink.
  *
- * Home link contract: set `homeHref` (hash or path). For react-router, pass
- * `renderBrandLink` that returns a NavLink using the provided `href` /
- * `aria-label`. Do not render the brand as plain text — it is how people go
- * home.
- *
- * Router-agnostic nav: the app renders links through `renderNav(close)` and
- * calls `close` when one is chosen. The drawer also closes on Escape, on a
- * click outside it, on its close button, and whenever `routeKey` changes.
- *
- * Focus follows the drawer: opening it moves focus onto the drawer (the close
- * button and the links are the next Tab stops), and closing it hands focus
- * back to the button that opened it, as the drawer slides over that button.
+ * The app renders its links through `renderNav(close)` and calls `close` when
+ * one is chosen. The drawer also closes on Escape, a click outside, its close
+ * button, and a change of `routeKey`. Opening moves focus onto the nav;
+ * closing returns it to the button that opened it.
  */
 export default function AppShell({
   brand,
@@ -47,8 +36,7 @@ export default function AppShell({
   const [open, setOpen] = useState(false);
   const navRef = useRef(null);
   const openerRef = useRef(null);
-  // Stable identities: `close` is handed to the app's renderNav on every
-  // render, so an app can memoize its links on it.
+  // `close` keeps one identity so an app can memoize its links on it.
   const close = useCallback(() => setOpen(false), []);
   const toggle = useCallback((event) => {
     openerRef.current = event.currentTarget;
