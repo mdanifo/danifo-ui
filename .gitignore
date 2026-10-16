@@ -7,3 +7,10 @@ test-results/
 *.tgz
 *.log
 .DS_Store
+
+# Never commit credentials or local secrets
+.env
+.env.*
+token-*.json
+credentials*.json
+*.pem
