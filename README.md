@@ -6,7 +6,7 @@ pieces the apps had each written for themselves.
 
 - `scss/_base.scss`: fonts, light and dark palettes, radii, drawer width. An app sets `$primary` and imports this in place of Bootstrap.
 - `AppShell`: the header (brand on the left, linking home; actions and the hamburger on the right) and the navigation, as a drawer, a sidebar from `lg`, or a phone tab bar.
-- `PageHeader`, `Eyebrow`, `Panel`, `Kpis` / `Kpi`, `DataTable`, `Foot`, `CenterState`, `DeltaBadge`, `BarRow`, `num`: page chrome.
+- `PageHeader`, `Eyebrow`, `Panel`, `PanelHeading`, `Kpis` / `Kpi`, `DataTable`, `Foot`, `CenterState`, `Skeleton`, `DeltaBadge`, `BarRow`, `num`: page chrome.
 - `configureTheme`, `initTheme`, `ThemeToggle`: system / light / dark, stored per app, applied as `data-bs-theme`.
 - `usd`, `usd0`, `usdRange`: money formatting. A range is joined so it cannot wrap at the dash.
 
