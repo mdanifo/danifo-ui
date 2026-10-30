@@ -117,6 +117,45 @@ export function BarRow({ label, amount, pct, extra, active = false }) {
   );
 }
 
+/**
+ * A Panel's eyebrow is a span, not a heading. Where the label names a section
+ * people jump between, wrap it in this so screen readers and keyboard users
+ * get a heading without the look changing:
+ *   <Panel eyebrow={<PanelHeading>Treadmill console</PanelHeading>}>
+ */
+export function PanelHeading({ level = 2, children }) {
+  return (
+    <span role="heading" aria-level={level}>
+      {children}
+    </span>
+  );
+}
+
+/**
+ * A placeholder the shape of the content that is coming, instead of a spinner
+ * and "Loading…": the page keeps its layout while it waits, so nothing jumps
+ * when the data lands. Hidden from assistive tech; the live content announces
+ * itself.
+ */
+export function Skeleton({ lines = 3, cards = 1, className = "mb-3" }) {
+  return (
+    <div aria-hidden="true" data-testid="skeleton">
+      {Array.from({ length: cards }, (_, c) => (
+        <Card key={c} className={className}>
+          <Card.Body className="placeholder-glow">
+            {Array.from({ length: lines }, (_, i) => (
+              <span
+                key={i}
+                className={`placeholder d-block mb-2 col-${i === 0 ? 5 : i % 3 === 0 ? 7 : 9}`}
+              />
+            ))}
+          </Card.Body>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
 export function toneClass(tone) {
   if (tone === "neg") return "text-danger";
   if (tone === "pos") return "text-success";

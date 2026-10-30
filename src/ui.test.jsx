@@ -11,6 +11,8 @@ import {
   Kpis,
   PageHeader,
   Panel,
+  PanelHeading,
+  Skeleton,
   num,
   toneClass,
 } from "./ui.jsx";
@@ -244,5 +246,38 @@ describe("BarRow", () => {
     expect(document.querySelector(".progress-bar")).toHaveStyle({ width: "0%" });
     rerender(<BarRow label="Half" amount="—" pct={50} />);
     expect(document.querySelector(".progress-bar")).toHaveStyle({ width: "50%" });
+  });
+});
+
+describe("PanelHeading", () => {
+  it("is a heading for assistive tech at the given level", () => {
+    render(
+      <Panel eyebrow={<PanelHeading level={3}>Treadmill console</PanelHeading>}>body</Panel>,
+    );
+    const heading = screen.getByRole("heading", { level: 3 });
+    expect(heading).toHaveTextContent("Treadmill console");
+    expect(heading.tagName).toBe("SPAN");
+  });
+
+  it("defaults to level 2", () => {
+    render(<PanelHeading>Rules</PanelHeading>);
+    expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent("Rules");
+  });
+});
+
+describe("Skeleton", () => {
+  it("draws the requested cards and lines and hides them from assistive tech", () => {
+    const { container } = render(<Skeleton cards={2} lines={4} />);
+    const root = screen.getByTestId("skeleton");
+    expect(root).toHaveAttribute("aria-hidden", "true");
+    expect(container.querySelectorAll(".card")).toHaveLength(2);
+    expect(container.querySelectorAll(".placeholder")).toHaveLength(8);
+    expect(container.querySelector(".placeholder-glow")).not.toBeNull();
+  });
+
+  it("defaults to one card of three lines", () => {
+    const { container } = render(<Skeleton />);
+    expect(container.querySelectorAll(".card")).toHaveLength(1);
+    expect(container.querySelectorAll(".placeholder")).toHaveLength(3);
   });
 });

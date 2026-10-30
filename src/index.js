@@ -20,11 +20,13 @@ export {
   Eyebrow,
   PageHeader,
   Panel,
+  PanelHeading,
   Kpis,
   Kpi,
   DataTable,
   Foot,
   CenterState,
+  Skeleton,
   DeltaBadge,
   BarRow,
 } from "./ui.jsx";
