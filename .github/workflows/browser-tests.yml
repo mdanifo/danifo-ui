@@ -1,0 +1,96 @@
+name: Browser tests
+# Reusable: runs an app's browser tests inside Microsoft's Playwright image, so
+# Chromium, its system libraries and its fonts are the same on every run and no
+# job downloads a browser. See "Browser tests in CI" in the README.
+on:
+  workflow_call:
+    inputs:
+      working-directory:
+        description: Where setup and test run, relative to the repo root.
+        type: string
+        default: "."
+      playwright-version:
+        description: The image's Playwright version. Empty reads @playwright/test from package-lock.json in working-directory.
+        type: string
+        default: ""
+      node-version:
+        type: string
+        default: "22"
+      python-version:
+        description: Also set up this Python, for a backend or a pytest suite. Empty skips it.
+        type: string
+        default: ""
+      setup:
+        description: Shell commands before the tests. $PLAYWRIGHT_VERSION holds the image's version.
+        type: string
+        default: npm ci
+      test:
+        description: Shell commands that run the tests.
+        type: string
+        default: npx playwright test
+      report-paths:
+        description: What to upload when the tests fail.
+        type: string
+        default: |
+          **/playwright-report
+          **/test-results
+          !**/node_modules/**
+      runner:
+        description: A self-hosted runner needs Docker.
+        type: string
+        default: ubuntu-latest
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    name: Playwright version
+    runs-on: ubuntu-latest
+    outputs:
+      playwright: ${{ steps.read.outputs.playwright }}
+    steps:
+      - uses: actions/checkout@v4
+      # The container is chosen before any of its steps run, so the version has
+      # to come from a job of its own.
+      - id: read
+        working-directory: ${{ inputs.working-directory }}
+        env:
+          PINNED: ${{ inputs.playwright-version }}
+        run: |
+          version="${PINNED:-$(node -p "require('./package-lock.json').packages['node_modules/@playwright/test'].version")}"
+          echo "playwright=$version" >> "$GITHUB_OUTPUT"
+
+  browser:
+    name: Browser tests
+    needs: version
+    runs-on: ${{ inputs.runner }}
+    container:
+      image: mcr.microsoft.com/playwright:v${{ needs.version.outputs.playwright }}-noble
+      options: --ipc=host
+    env:
+      CI: "1"
+      PLAYWRIGHT_VERSION: ${{ needs.version.outputs.playwright }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.working-directory }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.node-version }}
+      - uses: actions/setup-python@v5
+        if: inputs.python-version != ''
+        with:
+          python-version: ${{ inputs.python-version }}
+      - name: Set up
+        run: ${{ inputs.setup }}
+      - name: Run the tests
+        run: ${{ inputs.test }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-test-report
+          path: ${{ inputs.report-paths }}
+          retention-days: 7

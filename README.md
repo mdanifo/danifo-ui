@@ -128,6 +128,44 @@ brand goes home; light is white and dark follows the OS until a choice is
 made; a money range, and a KPI figure inside a `Panel`, stay on one line.
 CI runs all of it on each push and pull request.
 
+## Browser tests in CI
+
+`.github/workflows/browser-tests.yml` runs an app's browser tests inside the
+official Playwright image, on a GitHub-hosted runner. Nothing downloads a
+browser, and Chromium and its fonts only change when the Playwright version
+does. A Playwright app's whole job is:
+
+```yaml
+browser:
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.1
+  with:
+    working-directory: frontend
+```
+
+The image's tag comes from `@playwright/test` in that directory's
+`package-lock.json`, so the two cannot drift apart. `setup` and `test` default
+to `npm ci` and `npx playwright test`; `python-version` adds a Python for a
+backend. A pytest suite has no lockfile entry to read, so it pins the version
+and installs the same one:
+
+```yaml
+browser:
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.1
+  with:
+    playwright-version: "1.64.1"
+    python-version: "3.12"
+    setup: |
+      npm --prefix frontend ci
+      npm --prefix frontend run build
+      pip install -r requirements.txt "playwright==$PLAYWRIGHT_VERSION"
+    test: python -m pytest tests/browser -q
+```
+
+Tests run against a local build with fake data, never a live site, and the
+workflow passes no secrets. Failures upload `playwright-report` and
+`test-results`. A screenshot baseline has to be rendered in the same image.
+`runner` overrides `ubuntu-latest`; a self-hosted runner needs Docker.
+
 ## Release
 
 Bump `version`, tag `vX.Y.Z` and push the tag. The Release workflow checks
