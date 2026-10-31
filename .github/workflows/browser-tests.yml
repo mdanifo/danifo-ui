@@ -50,7 +50,7 @@ jobs:
     outputs:
       playwright: ${{ steps.read.outputs.playwright }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # The container is chosen before any of its steps run, so the version has
       # to come from a job of its own.
       - id: read
@@ -76,11 +76,11 @@ jobs:
         shell: bash
         working-directory: ${{ inputs.working-directory }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: ${{ inputs.node-version }}
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         if: inputs.python-version != ''
         with:
           python-version: ${{ inputs.python-version }}
@@ -88,7 +88,7 @@ jobs:
         run: ${{ inputs.setup }}
       - name: Run the tests
         run: ${{ inputs.test }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: browser-test-report

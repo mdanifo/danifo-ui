@@ -157,13 +157,15 @@ browser:
     setup: |
       npm --prefix frontend ci
       npm --prefix frontend run build
-      pip install -r requirements.txt "playwright==$PLAYWRIGHT_VERSION"
+      python -m pip install -r requirements.txt "playwright==$PLAYWRIGHT_VERSION"
     test: python -m pytest tests/browser -q
 ```
 
 Tests run against a local build with fake data, never a live site, and the
 workflow passes no secrets. Failures upload `playwright-report` and
 `test-results`. A screenshot baseline has to be rendered in the same image.
+Call pip as `python -m pip`: the `pip` script that `setup-python` provides does
+not run in a container.
 `runner` overrides `ubuntu-latest`; a self-hosted runner needs Docker.
 
 ## Release
