@@ -165,8 +165,9 @@ Tests run against a local build with fake data, never a live site, and the
 workflow passes no secrets. Failures upload `playwright-report` and
 `test-results`. A screenshot baseline has to be rendered in the same image.
 Call pip as `python -m pip`: the `pip` script that `setup-python` provides does
-not run in a container.
-`runner` overrides `ubuntu-latest`; a self-hosted runner needs Docker.
+not run in a container. The default host is `ubuntu-24.04`, the release the
+image is built on; `runner` changes it, but `ubuntu-latest` is still run as
+`ubuntu-24.04`. A self-hosted runner needs Docker.
 
 ## Release
 

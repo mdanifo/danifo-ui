@@ -36,9 +36,13 @@ on:
           **/test-results
           !**/node_modules/**
       runner:
-        description: A self-hosted runner needs Docker.
+        description: >-
+          Where the container runs; a self-hosted runner needs Docker. The image is Ubuntu
+          24.04 (noble) and setup-python reuses the host's Python build, which links the
+          host's OpenSSL, so a hosted runner must be 24.04 too. "ubuntu-latest" is therefore
+          run as ubuntu-24.04: on 26.04 the host's Python cannot import ssl inside noble.
         type: string
-        default: ubuntu-latest
+        default: ubuntu-24.04
 
 permissions:
   contents: read
@@ -64,7 +68,8 @@ jobs:
   browser:
     name: Browser tests
     needs: version
-    runs-on: ${{ inputs.runner }}
+    # The image's Ubuntu release and the host's must match (see `runner` above).
+    runs-on: ${{ inputs.runner == 'ubuntu-latest' && 'ubuntu-24.04' || inputs.runner }}
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.version.outputs.playwright }}-noble
       options: --ipc=host
