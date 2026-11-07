@@ -167,7 +167,10 @@ workflow passes no secrets. Failures upload `playwright-report` and
 Call pip as `python -m pip`: the `pip` script that `setup-python` provides does
 not run in a container. The default host is `ubuntu-24.04`, the release the
 image is built on; `runner` changes it, but `ubuntu-latest` is still run as
-`ubuntu-24.04`. A self-hosted runner needs Docker.
+`ubuntu-24.04`. A self-hosted runner needs Docker. Everything in the container
+runs as root, so the job ends by handing the runner's work directory back to
+its owner; otherwise the runner's next job outside a container could not
+delete the checkout.
 
 ## Release
 

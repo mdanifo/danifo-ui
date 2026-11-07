@@ -99,3 +99,16 @@ jobs:
           name: browser-test-report
           path: ${{ inputs.report-paths }}
           retention-days: 7
+      # Every step runs as the container's root, so all the job wrote in the
+      # runner's work directory (the checkout, node_modules, build output, a tool
+      # cache's Python) is root's. A self-hosted runner keeps that directory and
+      # runs its jobs as its own user, who cannot delete root's files, so its next
+      # job outside a container fails in actions/checkout. Hand it all back to
+      # the directory's owner; that also repairs what an earlier run left. On a
+      # hosted runner it costs a few seconds and keeps the step tested.
+      - name: Return the work directory to the runner's user
+        if: always()
+        working-directory: /
+        run: |
+          work="$(dirname "$(dirname "$GITHUB_WORKSPACE")")"
+          chown -R "$(stat -c %u:%g "$work")" "$work"
