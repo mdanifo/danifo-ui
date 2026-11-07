@@ -38,7 +38,10 @@ console.log(\`imported \${pkg.name}@\${pkg.version}: \${Object.keys(ui).length} 
   );
   run(process.execPath, ["app.mjs"], { cwd: app, stdio: "inherit" });
 
-  writeFileSync(join(app, "theme.scss"), '$primary: #1c7c54;\n@import "@danifo/ui/scss/base";\n');
+  writeFileSync(
+    join(app, "theme.scss"),
+    '$primary: #1c7c54;\n@import "@danifo/ui/scss/base";\n@import "@danifo/ui/scss/fonts";\n',
+  );
   const css = run(
     process.execPath,
     [
@@ -51,10 +54,16 @@ console.log(\`imported \${pkg.name}@\${pkg.version}: \${Object.keys(ui).length} 
     ],
     { cwd: app },
   );
-  if (!css.includes("--bs-primary: #1c7c54") || !css.includes(".dui-tabbar")) {
-    throw new Error("the compiled theme is missing the app's accent or the shell rules");
+  for (const [needle, what] of [
+    ["--bs-primary: #1c7c54", "the app's accent"],
+    [".dui-tabbar", "the shell rules"],
+    [".dui-kpis.row-cols-md-4", "the row-cols column counts for Kpis"],
+    ["--dui-series-1", "the chart tokens"],
+    ['font-family: "DM Sans Fallback"', "the font faces"],
+  ]) {
+    if (!css.includes(needle)) throw new Error(`the compiled theme is missing ${what}`);
   }
-  console.log(`compiled theme.scss through the package: ${Math.round(css.length / 1024)} kB of CSS, accent and shell rules present`);
+  console.log(`compiled theme.scss through the package: ${Math.round(css.length / 1024)} kB of CSS; accent, shell, Kpis column, chart and font rules present`);
 } finally {
   rmSync(app, { recursive: true, force: true });
 }

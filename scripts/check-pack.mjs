@@ -8,7 +8,24 @@ const stdout = execFileSync("npm", ["pack", "--dry-run", "--json"], { encoding: 
 const [pack] = JSON.parse(stdout.slice(stdout.lastIndexOf("\n[") + 1));
 const paths = pack.files.map((f) => f.path).sort();
 
-const required = ["dist/index.js", "dist/index.js.map", "scss/_base.scss", "scss/_shell.scss", "package.json", "README.md"];
+const required = [
+  "dist/index.js",
+  "dist/index.js.map",
+  "scss/_base.scss",
+  "scss/_shell.scss",
+  "scss/_charts.scss",
+  "scss/_fonts.scss",
+  "fonts/README.md",
+  "fonts/OFL.txt",
+  "fonts/dm-sans-normal-latin.woff2",
+  "fonts/dm-sans-normal-latin-ext.woff2",
+  "fonts/dm-sans-italic-latin.woff2",
+  "fonts/dm-sans-italic-latin-ext.woff2",
+  "fonts/ibm-plex-mono-normal-latin.woff2",
+  "fonts/ibm-plex-mono-normal-latin-ext.woff2",
+  "package.json",
+  "README.md",
+];
 const forbidden = /^(src|demo|e2e|scripts|docs|coverage|node_modules)\//;
 
 const missing = required.filter((p) => !paths.includes(p));

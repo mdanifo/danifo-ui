@@ -15,9 +15,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
  *
  * The app renders its links through `renderNav(close)` and calls `close` when
  * one is chosen. The drawer also closes on Escape, a click outside, its close
- * button, and a change of `routeKey`. Opening moves focus onto the nav;
- * closing returns it to the button that opened it.
+ * button, and a change of `routeKey`. Opening moves focus onto the nav and
+ * makes the page and tab bar inert, so Tab stays in the menu and the page
+ * neither scrolls nor takes a click; closing undoes that and returns focus to
+ * the button that opened it.
  */
+
+// Bootstrap's lg breakpoint: where .offcanvas-lg stops being a drawer.
+const LG = 992;
+
 export default function AppShell({
   brand,
   brandSub = "danifo.dev",
@@ -68,6 +74,32 @@ export default function AppShell({
     const active = document.activeElement;
     if (active === document.body || nav.contains(active)) opener.focus({ preventScroll: true });
   }, [open]);
+  // The page does not scroll under an open drawer. Hiding the root's overflow
+  // takes a classic scrollbar away, so its width is added as padding and the
+  // page does not shift behind the backdrop.
+  useEffect(() => {
+    if (!open) return undefined;
+    const root = document.documentElement;
+    const gutter = window.innerWidth - root.clientWidth;
+    const { overflow, paddingRight } = root.style;
+    root.style.overflow = "hidden";
+    if (gutter > 0) root.style.paddingRight = `${gutter}px`;
+    return () => {
+      root.style.overflow = overflow;
+      root.style.paddingRight = paddingRight;
+    };
+  }, [open]);
+  // In the sidebar layout the drawer stops existing at lg. If it was open when
+  // the window crossed that width, close it, or the page would stay inert.
+  useEffect(() => {
+    if (!sidebar || typeof window.matchMedia !== "function") return undefined;
+    const query = window.matchMedia(`(min-width: ${LG}px)`);
+    const onChange = (event) => {
+      if (event.matches) setOpen(false);
+    };
+    query.addEventListener("change", onChange);
+    return () => query.removeEventListener("change", onChange);
+  }, [sidebar]);
 
   const homeLabel = brandAriaLabel ?? `${brand} home`;
 
@@ -140,8 +172,8 @@ export default function AppShell({
         <div className="offcanvas-body d-flex flex-column gap-1 p-2">{renderNav(close)}</div>
       </nav>
 
-      <div className="d-flex flex-column min-vh-100 flex-grow-1 min-w-0">
-        <header className="app-header navbar sticky-top bg-body border-bottom px-2 px-lg-3 flex-nowrap">
+      <div className="d-flex flex-column min-vh-100 flex-grow-1 min-w-0" inert={open || undefined}>
+        <header className="app-header navbar sticky-top bg-body border-bottom flex-nowrap">
           {renderBrandLink
             ? renderBrandLink(brandLinkProps)
             : (
@@ -167,7 +199,7 @@ export default function AppShell({
       </div>
 
       {hasTabs ? (
-        <nav className="dui-tabbar d-lg-none" aria-label="Main pages">
+        <nav className="dui-tabbar d-lg-none" aria-label="Main pages" inert={open || undefined}>
           {renderTabs()}
           <button
             type="button"

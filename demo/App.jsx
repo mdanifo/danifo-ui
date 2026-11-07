@@ -54,6 +54,7 @@ export default function App() {
           aria-current={p.id === page ? "page" : undefined}
           onClick={close}
         >
+          <span className="dui-nav-icon" aria-hidden="true">{p.icon}</span>
           {p.label}
         </a>
       ))}

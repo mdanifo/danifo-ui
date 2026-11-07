@@ -1,6 +1,6 @@
 {
   "name": "@danifo/ui",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "private": true,
   "description": "Shared look, feel and shell for the danifo.dev dashboards (Bootstrap 5.3 + React).",
   "repository": "github:mdanifo/danifo-ui",
@@ -11,11 +11,13 @@
     "./scss/base": "./scss/_base.scss",
     "./scss/shell": "./scss/_shell.scss",
     "./scss/*": "./scss/*",
+    "./fonts/*": "./fonts/*",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
-    "scss"
+    "scss",
+    "fonts"
   ],
   "sideEffects": false,
   "engines": {
@@ -31,7 +33,7 @@
     "demo": "vite --config vite.demo.config.js",
     "demo:build": "vite build --config vite.demo.config.js",
     "demo:preview": "vite preview --config vite.demo.config.js",
-    "check:scss": "echo '$primary: #1c7c54; @import \"base\";' | sass --stdin --load-path=scss --load-path=node_modules --quiet-deps --silence-deprecation=import --no-source-map > /dev/null",
+    "check:scss": "echo '$primary: #1c7c54; @import \"base\"; @import \"fonts\";' | sass --stdin --load-path=scss --load-path=node_modules --quiet-deps --silence-deprecation=import --no-source-map > /dev/null",
     "check:pack": "node scripts/check-pack.mjs",
     "check:consumer": "node scripts/check-consumer.mjs"
   },

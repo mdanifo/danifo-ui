@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import AppShell from "./AppShell.jsx";
@@ -294,6 +294,49 @@ describe("AppShell", () => {
     expect(isOpen()).toBe(false);
   });
 
+  it("makes the page inert and stops it scrolling while the drawer is open", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const content = document.querySelector("main").parentElement;
+    const root = document.documentElement;
+    expect(content).not.toHaveAttribute("inert");
+    await user.click(hamburger());
+    expect(content).toHaveAttribute("inert");
+    expect(root.style.overflow).toBe("hidden");
+    // jsdom lays nothing out: innerWidth 1024 against a clientWidth of 0 reads
+    // as a 1024px scrollbar, which is the padding path.
+    expect(root.style.paddingRight).toBe("1024px");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
+    expect(content).not.toHaveAttribute("inert");
+    expect(root.style.overflow).toBe("");
+    expect(root.style.paddingRight).toBe("");
+  });
+
+  it("adds no scrollbar padding when the page has no classic scrollbar", async () => {
+    const user = userEvent.setup();
+    const root = document.documentElement;
+    Object.defineProperty(root, "clientWidth", { configurable: true, get: () => window.innerWidth });
+    try {
+      render(<Harness />);
+      await user.click(hamburger());
+      expect(root.style.overflow).toBe("hidden");
+      expect(root.style.paddingRight).toBe("");
+    } finally {
+      delete root.clientWidth;
+    }
+  });
+
+  it("does not watch the lg breakpoint in the drawer layout", () => {
+    const matchMedia = vi.spyOn(window, "matchMedia");
+    try {
+      render(<Harness />);
+      expect(matchMedia.mock.calls.some(([query]) => query.includes("min-width"))).toBe(false);
+    } finally {
+      matchMedia.mockRestore();
+    }
+  });
+
   it("hands renderNav the same close function on every render", () => {
     const seen = new Set();
     const renderNav = (close) => {
@@ -349,6 +392,38 @@ describe("AppShell sidebar layout", () => {
     expect(document.querySelector(".offcanvas-backdrop")).toHaveClass("d-lg-none");
     await user.click(screen.getByRole("link", { name: "Payoff" }));
     expect(isOpen()).toBe(false);
+  });
+
+  it("closes the drawer when the window grows past lg, where the column is static", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<Harness layout="sidebar" />);
+    await user.click(screen.getByRole("button", { name: "Open menu" }));
+    expect(isOpen()).toBe(true);
+    window.__isLg = true;
+    act(() => window.__notifyMedia());
+    expect(isOpen()).toBe(false);
+    expect(document.querySelector("main").parentElement).not.toHaveAttribute("inert");
+    // Shrinking back does nothing on its own; the hamburger is the way in again.
+    window.__isLg = false;
+    act(() => window.__notifyMedia());
+    expect(isOpen()).toBe(false);
+    // The listener goes with the shell.
+    unmount();
+    window.__isLg = true;
+    act(() => window.__notifyMedia());
+  });
+
+  it("copes without matchMedia", async () => {
+    const user = userEvent.setup();
+    const matchMedia = window.matchMedia;
+    window.matchMedia = undefined;
+    try {
+      render(<Harness layout="sidebar" />);
+      await user.click(screen.getByRole("button", { name: "Open menu" }));
+      expect(isOpen()).toBe(true);
+    } finally {
+      window.matchMedia = matchMedia;
+    }
   });
 
   it("puts the nav before the page in the DOM, so it reads first and sits on the left", () => {
@@ -416,6 +491,18 @@ describe("AppShell tab bar", () => {
     await user.click(screen.getByRole("button", { name: "Close menu" }));
     expect(isOpen()).toBe(false);
     expect(screen.getByRole("button", { name: /More: open the full menu/ })).toHaveAttribute("aria-expanded", "false");
+  });
+
+  it("is inert while the drawer is open, like the page", async () => {
+    const user = userEvent.setup();
+    render(<Harness renderTabs={tabs} />);
+    const bar = screen.getByRole("navigation", { name: "Main pages" });
+    expect(bar).not.toHaveAttribute("inert");
+    await user.click(screen.getByRole("button", { name: /More: open the full menu/, hidden: true }));
+    expect(bar).toHaveAttribute("inert");
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(isOpen()).toBe(false));
+    expect(bar).not.toHaveAttribute("inert");
   });
 
   it("takes a custom More label", () => {
