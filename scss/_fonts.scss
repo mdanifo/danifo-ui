@@ -41,6 +41,12 @@ $dui-latin-ext: unquote("U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+0
 // IBM Plex Mono v20, medium: tables of figures and the eyebrow labels.
 @include dui-face("IBM Plex Mono", normal, 500, "ibm-plex-mono-normal-latin.woff2", $dui-latin);
 @include dui-face("IBM Plex Mono", normal, 500, "ibm-plex-mono-normal-latin-ext.woff2", $dui-latin-ext);
+// Semibold, for monospace text at 600 or bold: a table's header over a column
+// of figures, an app's emphasised figures. Font matching gives a bold (700)
+// request this face rather than a synthesized bold of the 500. The browser
+// fetches it only when a page sets monospace text that heavy.
+@include dui-face("IBM Plex Mono", normal, 600, "ibm-plex-mono-600-latin.woff2", $dui-latin);
+@include dui-face("IBM Plex Mono", normal, 600, "ibm-plex-mono-600-latin-ext.woff2", $dui-latin-ext);
 
 @font-face {
   font-family: "DM Sans Fallback";

@@ -157,8 +157,11 @@ html {
 }
 
 // Each tile is a size container, so its figure is sized by the tile it sits in
-// (cqi), whatever the column count: two tiles on a phone and four on a laptop
-// come out much as before, and six across steps down instead of overflowing.
+// (cqi), whatever the column count. The figure's width is then a fixed share of
+// its tile: at 12.5cqi, measured in DM Sans 600 at these optical sizes, a
+// five-figure money range ("$28,476–29,701") takes 90% of the tile and a
+// six-figure one 98%. The 1.125rem floor is 12.5cqi of a 9rem tile, the
+// narrowest Kpis makes; a narrower row-cols tile gets the floor.
 .dui-kpi {
   min-width: 0;
   container-type: inline-size;
@@ -170,7 +173,7 @@ html {
 // narrow column; let it overflow instead.
 .dui-kpi-value {
   margin-top: 0.15rem;
-  font-size: clamp(1.25rem, 14cqi, 2.125rem);
+  font-size: clamp(1.125rem, 12.5cqi, 2.125rem);
   font-weight: 600;
   line-height: 1.1;
   letter-spacing: -0.015em;
