@@ -50,9 +50,12 @@ for (const [name, options] of [
       const loaded = await page.evaluate(async () => {
         const sans = await document.fonts.load('1em "DM Sans"');
         const mono = await document.fonts.load('500 1em "IBM Plex Mono"');
-        return { sans: sans.length, mono: mono.length, status: document.fonts.status };
+        // Bold monospace (a table header over figures) gets the semibold face,
+        // not a synthesized bold of the 500.
+        const boldMono = await document.fonts.load('700 1em "IBM Plex Mono"');
+        return { sans: sans.length, mono: mono.length, boldMono: boldMono.map((f) => f.weight).join(), status: document.fonts.status };
       });
-      expect(loaded).toEqual({ sans: 1, mono: 1, status: "loaded" });
+      expect(loaded).toEqual({ sans: 1, mono: 1, boldMono: "600", status: "loaded" });
     });
 
     test("Kpis keeps an app's row-cols column count, and each figure is sized by its tile", async ({ page }) => {
@@ -85,11 +88,39 @@ for (const [name, options] of [
       expect(rows.twoThenSix.perLine).toBe(name === "phone" ? 2 : 6);
       // A tile fills its column; row-cols would otherwise make it a third of it.
       expect(rows.three.tile).toBeGreaterThan(rows.three.width / 3 - 20);
-      // The narrower tile gets the smaller figure, within the 1.25rem to 2.125rem bounds.
+      // The narrower tile gets the smaller figure, within the 1.125rem to 2.125rem bounds.
       const [narrow, wide] = rows.three.tile < rows.twoThenSix.tile ? [rows.three, rows.twoThenSix] : [rows.twoThenSix, rows.three];
       expect(narrow.font).toBeLessThan(wide.font);
-      expect(narrow.font).toBeGreaterThanOrEqual(20);
+      expect(narrow.font).toBeGreaterThanOrEqual(18);
       expect(wide.font).toBeLessThanOrEqual(34);
+    });
+
+    test("a money range of five or six figures a side fits a Kpi tile at the 9rem minimum", async ({ page }) => {
+      await page.goto("/#/drawer/home");
+      const tiles = await page.evaluate(async () => {
+        await document.fonts.load('600 1em "DM Sans"');
+        const joiner = "⁠"; // what usdRange puts on each side of the dash
+        const row = document.createElement("div");
+        row.className = "dui-kpis";
+        row.style.width = "308px"; // two 9rem columns and the 1.25rem gap
+        for (const text of [`$28,476${joiner}–${joiner}29,701`, `$128,476${joiner}–${joiner}129,701`]) {
+          const tile = document.createElement("div");
+          tile.className = "dui-kpi";
+          tile.innerHTML = `<div class="dui-kpi-value">${text}</div>`;
+          row.append(tile);
+        }
+        document.querySelector(".demo-page").append(row);
+        const out = [...row.children].map((tile) => {
+          const value = tile.querySelector(".dui-kpi-value");
+          return { width: Math.round(tile.getBoundingClientRect().width), fits: value.scrollWidth <= value.clientWidth };
+        });
+        row.remove();
+        return out;
+      });
+      expect(tiles).toEqual([
+        { width: 144, fits: true },
+        { width: 144, fits: true },
+      ]);
     });
 
     test("the components page shows every piece of chrome", async ({ page }) => {

@@ -66,8 +66,10 @@ Google Fonts `<link>`:
 
 Vite copies the woff2 files out of the package and fingerprints them. Until
 they arrive the text is set in Arial (or Liberation Sans) scaled to DM Sans's
-metrics, so the swap moves nothing. The files and their licence are described
-in `fonts/README.md`.
+metrics, so the swap moves nothing. DM Sans comes in weights 400 to 700 and
+in italic. IBM Plex Mono comes in 500 and 600, and 600 also serves bold.
+The browser fetches a weight only when the page uses it. The files and their
+licence are described in `fonts/README.md`.
 
 ### Charts
 
@@ -139,8 +141,10 @@ itself rather than the viewport, each at least `min` wide (default `9rem`).
 An app written for the earlier Bootstrap-row `Kpis` can keep its `row-cols-*`
 classes: they still set the number of columns at each breakpoint. `Kpi` sets
 its figure in the body face with tabular figures, sized to its own tile (a
-container query), so a figure in a narrow column steps down rather than
-overflowing. `delta` is a percent change shown as a
+container query) between 1.125rem and 2.125rem, so a figure in a narrow column
+steps down rather than overflowing. A money range of up to six figures a side
+("$128,476–129,701") fits a tile at the 9rem minimum. A narrower `row-cols`
+tile keeps the 1.125rem floor and fits less. `delta` is a percent change shown as a
 `DeltaBadge`, where a rise is bad unless `deltaGoodWhen="up"`; `spark` is a
 small chart under the figure, hidden from assistive tech.
 

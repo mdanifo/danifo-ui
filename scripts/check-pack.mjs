@@ -23,6 +23,8 @@ const required = [
   "fonts/dm-sans-italic-latin-ext.woff2",
   "fonts/ibm-plex-mono-normal-latin.woff2",
   "fonts/ibm-plex-mono-normal-latin-ext.woff2",
+  "fonts/ibm-plex-mono-600-latin.woff2",
+  "fonts/ibm-plex-mono-600-latin-ext.woff2",
   "package.json",
   "README.md",
 ];
