@@ -36,9 +36,13 @@ on:
           **/test-results
           !**/node_modules/**
       runner:
-        description: A self-hosted runner needs Docker.
+        description: >-
+          Where the container runs; a self-hosted runner needs Docker. The image is Ubuntu
+          24.04 (noble) and setup-python reuses the host's Python build, which links the
+          host's OpenSSL, so a hosted runner must be 24.04 too. "ubuntu-latest" is therefore
+          run as ubuntu-24.04: on 26.04 the host's Python cannot import ssl inside noble.
         type: string
-        default: ubuntu-latest
+        default: ubuntu-24.04
 
 permissions:
   contents: read
@@ -64,7 +68,8 @@ jobs:
   browser:
     name: Browser tests
     needs: version
-    runs-on: ${{ inputs.runner }}
+    # The image's Ubuntu release and the host's must match (see `runner` above).
+    runs-on: ${{ inputs.runner == 'ubuntu-latest' && 'ubuntu-24.04' || inputs.runner }}
     container:
       image: mcr.microsoft.com/playwright:v${{ needs.version.outputs.playwright }}-noble
       options: --ipc=host
@@ -94,3 +99,16 @@ jobs:
           name: browser-test-report
           path: ${{ inputs.report-paths }}
           retention-days: 7
+      # Every step runs as the container's root, so all the job wrote in the
+      # runner's work directory (the checkout, node_modules, build output, a tool
+      # cache's Python) is root's. A self-hosted runner keeps that directory and
+      # runs its jobs as its own user, who cannot delete root's files, so its next
+      # job outside a container fails in actions/checkout. Hand it all back to
+      # the directory's owner; that also repairs what an earlier run left. On a
+      # hosted runner it costs a few seconds and keeps the step tested.
+      - name: Return the work directory to the runner's user
+        if: always()
+        working-directory: /
+        run: |
+          work="$(dirname "$(dirname "$GITHUB_WORKSPACE")")"
+          chown -R "$(stat -c %u:%g "$work")" "$work"

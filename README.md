@@ -15,7 +15,7 @@ pieces the apps had each written for themselves.
 Pin a release. The tarball attached to each GitHub Release is prebuilt:
 
 ```bash
-npm i https://github.com/mdanifo/danifo-ui/releases/download/v0.3.1/danifo-ui-0.3.1.tgz
+npm i https://github.com/mdanifo/danifo-ui/releases/download/v0.4.2/danifo-ui-0.4.2.tgz
 ```
 
 The git tag works too, but then `prepare` runs `vite build` on each install
@@ -23,7 +23,7 @@ of the app, with this repo's devDependencies along for the ride (Playwright
 alone is about 19 MB):
 
 ```bash
-npm i github:mdanifo/danifo-ui#v0.3.1
+npm i github:mdanifo/danifo-ui#v0.4.2
 ```
 
 Do not point an app at `#main`: a library change would then ship with the
@@ -137,7 +137,7 @@ does. A Playwright app's whole job is:
 
 ```yaml
 browser:
-  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.1
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.2
   with:
     working-directory: frontend
 ```
@@ -150,7 +150,7 @@ and installs the same one:
 
 ```yaml
 browser:
-  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.1
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.2
   with:
     playwright-version: "1.64.1"
     python-version: "3.12"
@@ -165,8 +165,12 @@ Tests run against a local build with fake data, never a live site, and the
 workflow passes no secrets. Failures upload `playwright-report` and
 `test-results`. A screenshot baseline has to be rendered in the same image.
 Call pip as `python -m pip`: the `pip` script that `setup-python` provides does
-not run in a container.
-`runner` overrides `ubuntu-latest`; a self-hosted runner needs Docker.
+not run in a container. The default host is `ubuntu-24.04`, the release the
+image is built on; `runner` changes it, but `ubuntu-latest` is still run as
+`ubuntu-24.04`. A self-hosted runner needs Docker. Everything in the container
+runs as root, so the job ends by handing the runner's work directory back to
+its owner; otherwise the runner's next job outside a container could not
+delete the checkout.
 
 ## Release
 
