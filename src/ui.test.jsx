@@ -94,34 +94,70 @@ describe("Panel", () => {
 });
 
 describe("Kpis / Kpi", () => {
-  it("tones positive and negative values", () => {
+  it("tones positive, negative and warning values", () => {
     render(
       <Kpis>
         <Kpi label="Cash" value="$10" tone="pos" hint="up" />
         <Kpi label="Debt" value="$2" tone="neg" />
+        <Kpi label="Due" value="3 bills" tone="warn" />
       </Kpis>,
     );
     expect(screen.getByText("$10")).toHaveClass("text-success");
     expect(screen.getByText("$2")).toHaveClass("text-danger");
+    expect(screen.getByText("3 bills")).toHaveClass("text-warning-emphasis");
     expect(screen.getByText("up")).toHaveClass("text-body-secondary");
   });
 
-  it("lays out two per row on phones and four from md unless told otherwise", () => {
+  it("is a grid sized by its own width, with an optional minimum tile width", () => {
     const { rerender } = render(<Kpis>k</Kpis>);
-    expect(screen.getByText("k")).toHaveClass("row", "g-3", "row-cols-2", "row-cols-md-4");
+    const row = () => screen.getByText("k");
+    expect(row()).toHaveClass("dui-kpis");
+    expect(row()).not.toHaveClass("row");
+    expect(row()).not.toHaveAttribute("style");
 
-    rerender(<Kpis className="row-cols-3">k</Kpis>);
-    expect(screen.getByText("k")).toHaveClass("row-cols-3");
-    expect(screen.getByText("k")).not.toHaveClass("row-cols-2");
+    rerender(
+      <Kpis min="12rem" className="mb-4">
+        k
+      </Kpis>,
+    );
+    expect(row()).toHaveClass("dui-kpis", "mb-4");
+    expect(row().style.getPropertyValue("--dui-kpi-min")).toBe("12rem");
   });
 
-  it("renders a plain value without a tone or hint", () => {
+  it("renders a plain value without a tone, hint, delta or sparkline", () => {
     render(<Kpi label="Net" value="$0" />);
     const value = screen.getByText("$0");
-    expect(value).toHaveClass("dui-kpi-value", "fs-5", "font-monospace");
+    expect(value).toHaveClass("dui-kpi-value");
     expect(value).not.toHaveClass("text-success");
     expect(value).not.toHaveClass("text-danger");
+    expect(value).not.toHaveClass("font-monospace");
+    expect(value.parentElement).toHaveClass("dui-kpi");
     expect(value.parentElement.querySelector(".small")).toBeNull();
+    expect(value.parentElement.querySelector(".dui-kpi-spark")).toBeNull();
+    expect(value.querySelector(".dui-kpi-delta")).toBeNull();
+  });
+
+  it("shows a change as a delta badge, by number or as given, and a sparkline under the figure", () => {
+    const { rerender } = render(
+      <Kpi label="Spend" value="$640" delta={-8.1} spark={<svg data-testid="spark" />} />,
+    );
+    expect(screen.getByText("−8%")).toHaveClass("badge", "bg-success-subtle");
+    expect(screen.getByText("−8%").closest(".dui-kpi-delta")).not.toBeNull();
+    const spark = screen.getByTestId("spark").parentElement;
+    expect(spark).toHaveClass("dui-kpi-spark");
+    expect(spark).toHaveAttribute("aria-hidden", "true");
+
+    rerender(<Kpi label="Spend" value="$640" delta={null} />);
+    expect(screen.getByText("new")).toHaveClass("badge");
+
+    rerender(<Kpi label="Spend" value="$640" delta={<em>custom</em>} />);
+    expect(screen.getByText("custom").closest(".dui-kpi-delta")).not.toBeNull();
+    expect(document.querySelector(".badge")).toBeNull();
+  });
+
+  it("can count a rise as good", () => {
+    render(<Kpi label="Net" value="$1" delta={12.4} deltaGoodWhen="up" />);
+    expect(screen.getByText("+12%")).toHaveClass("bg-success-subtle", "text-success-emphasis");
   });
 });
 
@@ -142,6 +178,7 @@ describe("DataTable / Foot / num / toneClass", () => {
     expect(num).toContain("font-monospace");
     expect(toneClass("pos")).toBe("text-success");
     expect(toneClass("neg")).toBe("text-danger");
+    expect(toneClass("warn")).toBe("text-warning-emphasis");
     expect(toneClass()).toBe("");
   });
 
@@ -214,6 +251,15 @@ describe("DeltaBadge", () => {
     expect(screen.getByText("−100%")).toBeInTheDocument();
     rerender(<DeltaBadge />);
     expect(screen.getByText("new")).toBeInTheDocument();
+  });
+
+  it("swaps the colours when a rise is the good direction", () => {
+    const { rerender } = render(<DeltaBadge pct={12.4} goodWhen="up" />);
+    expect(screen.getByText("+12%")).toHaveClass("bg-success-subtle", "text-success-emphasis");
+    rerender(<DeltaBadge pct={-8.1} goodWhen="up" />);
+    expect(screen.getByText("−8%")).toHaveClass("bg-danger-subtle", "text-danger-emphasis");
+    rerender(<DeltaBadge pct={0.2} goodWhen="up" />);
+    expect(screen.getByText("—")).toHaveClass("bg-secondary-subtle");
   });
 });
 

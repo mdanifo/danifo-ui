@@ -1,0 +1,32 @@
+// Chart tokens, imported by the base: six categorical series colours per
+// theme and the chrome around them. The series were validated for
+// colour-vision deficiency, normal-vision separation and contrast against the
+// base theme's surfaces (white; #12141a in dark), as a set and in this order.
+//
+// Assign slots in order and never cycle them: a seventh series folds into
+// "Other" or a second chart. Slots 3 to 5 sit below 3:1 on the light surface,
+// so a chart that uses them also shows direct labels or a table. Good and bad
+// (a rise in spending, a missed target) wear Bootstrap's success and danger,
+// never a series slot.
+:root,
+[data-bs-theme="light"] {
+  --dui-series-1: #2a78d6;
+  --dui-series-2: #eb6834;
+  --dui-series-3: #1baf7a;
+  --dui-series-4: #eda100;
+  --dui-series-5: #e87ba4;
+  --dui-series-6: #008300;
+  --dui-chart-grid: var(--bs-border-color);
+  --dui-chart-axis: var(--bs-secondary-color);
+  --dui-chart-ink: var(--bs-body-color);
+  --dui-chart-surface: var(--bs-body-bg);
+}
+
+[data-bs-theme="dark"] {
+  --dui-series-1: #3987e5;
+  --dui-series-2: #d95926;
+  --dui-series-3: #199e70;
+  --dui-series-4: #c98500;
+  --dui-series-5: #d55181;
+  --dui-series-6: #008300;
+}

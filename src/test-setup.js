@@ -11,6 +11,7 @@ const mediaListeners = new Map();
 
 function mediaMatches(query) {
   if (query.includes("prefers-color-scheme: dark")) return window.__prefersDark === true;
+  if (query.includes("min-width: 992px")) return window.__isLg === true;
   return false;
 }
 
@@ -54,6 +55,7 @@ beforeEach(() => {
   document.documentElement.removeAttribute("data-bs-theme");
   window.localStorage.clear();
   window.__prefersDark = false;
+  window.__isLg = false;
 });
 
 // Testing Library only cleans up on its own when vitest globals are enabled.

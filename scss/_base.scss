@@ -1,13 +1,17 @@
 // danifo.dev base theme. An app sets only what makes it itself, then imports
-// this file instead of Bootstrap:
+// this file instead of Bootstrap, and the fonts if it wants them served from
+// its own origin:
 //
 //   $primary: #1c7c54;                 // finance pine; workout uses #2563eb
 //   @import "@danifo/ui/scss/base";
+//   @import "@danifo/ui/scss/fonts";   // optional: DM Sans and IBM Plex Mono, self-hosted
 //
 // Every variable here is !default, so an app value set before the import wins.
+// The "Fallback" families are metric-matched local fonts declared by the fonts
+// partial; without it they are unknown and the stack falls through.
 
-$font-family-sans-serif: "DM Sans", system-ui, -apple-system, "Segoe UI", sans-serif !default;
-$font-family-monospace: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace !default;
+$font-family-sans-serif: "DM Sans", "DM Sans Fallback", system-ui, -apple-system, "Segoe UI", sans-serif !default;
+$font-family-monospace: "IBM Plex Mono", "IBM Plex Mono Fallback", ui-monospace, SFMono-Regular, Menlo, monospace !default;
 
 $primary: #2563eb !default;
 $danger: #c02626 !default;
@@ -35,3 +39,4 @@ $offcanvas-horizontal-width: 280px !default;
 
 @import "bootstrap/scss/bootstrap";
 @import "shell";
+@import "charts";

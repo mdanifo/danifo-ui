@@ -6,22 +6,71 @@ html {
   overflow-x: clip;
 }
 
+// Bootstrap sets color-scheme for dark only. Say light too, so native controls
+// and scrollbars follow the app's choice rather than the OS, and so light-dark()
+// in an app's own tokens resolves by data-bs-theme.
+:root,
+[data-bs-theme="light"] {
+  color-scheme: light;
+}
+
 // Flex children default to min-width: auto, which lets a wide table stretch
 // the page; tables scroll inside .table-responsive instead.
 .min-w-0 {
   min-width: 0 !important;
 }
 
-// Opaque, so the page does not show through the open drawer.
+// Opaque, so the page does not show through the open drawer. The page behind
+// it is inert while it is open (AppShell), and a scroll that reaches the end of
+// the menu stops there instead of moving the page.
 #primary-nav.primary-nav {
   background-color: var(--bs-body-bg) !important;
+  padding-right: env(safe-area-inset-right, 0px);
 }
 
-// Menu items read larger than Bootstrap's 1rem default against the drawer.
+#primary-nav .offcanvas-body {
+  overscroll-behavior: contain;
+}
+
+// Menu items read larger than Bootstrap's 1rem default against the drawer. A
+// link is a flex row so an icon (.dui-nav-icon) or a count sits beside the
+// label. Bootstrap styles .nav-link.active only inside .nav-pills and
+// .nav-tabs, so the current page is marked here, in both themes, with the
+// primary's subtle background and emphasis text.
 #primary-nav .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
   font-size: 1.125rem;
   padding: 0.55rem 0.85rem;
   border-radius: var(--bs-border-radius);
+}
+
+#primary-nav .nav-link:hover,
+#primary-nav .nav-link:focus-visible {
+  background-color: var(--bs-tertiary-bg);
+}
+
+#primary-nav .nav-link.active,
+#primary-nav .nav-link[aria-current="page"] {
+  background-color: var(--bs-primary-bg-subtle);
+  color: var(--bs-primary-text-emphasis);
+  font-weight: 600;
+}
+
+// A small framed glyph before a menu label: a letter, a symbol or an SVG.
+.dui-nav-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.625rem;
+  height: 1.625rem;
+  border: 1.5px solid currentColor;
+  border-radius: 0.45rem;
+  font-family: var(--bs-font-monospace);
+  font-size: 0.78rem;
+  font-weight: 500;
+  line-height: 1;
 }
 
 .dui-brand-sub {
@@ -54,22 +103,102 @@ html {
 }
 
 // Keep the brand on the left and the menu cluster on the right even if an app
-// restyles .navbar. The hamburger is the last child of .dui-header-end.
+// restyles .navbar. The hamburger is the last child of .dui-header-end. The
+// side padding comes from here rather than a spacing utility so the safe-area
+// insets (a notch; the status bar of an installed app) can add to it.
 .app-header.navbar {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-start;
+  padding-top: calc(var(--bs-navbar-padding-y) + env(safe-area-inset-top, 0px));
+  padding-right: max(0.5rem, env(safe-area-inset-right, 0px));
+  padding-left: max(0.5rem, env(safe-area-inset-left, 0px));
+}
+
+@include media-breakpoint-up(lg) {
+  .app-header.navbar {
+    padding-right: max(1rem, env(safe-area-inset-right, 0px));
+    padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  }
 }
 
 .app-header .dui-header-end {
   margin-left: auto;
 }
 
-// Bootstrap's .card sets overflow-wrap: break-word, which would split a KPI
-// figure mid-number in a narrow column. Let it overflow instead.
+// KPI row: a grid that fits as many tiles as the row is wide, each at least
+// --dui-kpi-min, so a Kpis inside a narrow Panel or beside the sidebar lays
+// itself out by its own width, not the viewport's.
+.dui-kpis {
+  --dui-kpi-min: 9rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(var(--dui-kpi-min), 100%), 1fr));
+  gap: 1rem 1.25rem;
+}
+
+// Until 0.5 Kpis was a Bootstrap .row, and apps pass row-cols-* to say how many
+// tiles share it. Those still set the column count, breakpoint by breakpoint.
+// The grid's gap stands in for the row's gutters, and the tiles take the
+// grid's widths rather than the fraction row-cols gives a row's children.
+.dui-kpis > * {
+  width: auto;
+}
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+    @for $i from 1 through $grid-row-columns {
+      .dui-kpis.row-cols#{$infix}-#{$i} {
+        grid-template-columns: repeat($i, minmax(0, 1fr));
+      }
+    }
+  }
+}
+
+// Each tile is a size container, so its figure is sized by the tile it sits in
+// (cqi), whatever the column count: two tiles on a phone and four on a laptop
+// come out much as before, and six across steps down instead of overflowing.
+.dui-kpi {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+// The figure is set in the body face with tabular figures, so a row of tiles
+// lines up and a value that changes does not jiggle. Bootstrap's .card sets
+// overflow-wrap: break-word, which would split a KPI figure mid-number in a
+// narrow column; let it overflow instead.
 .dui-kpi-value {
+  margin-top: 0.15rem;
+  font-size: clamp(1.25rem, 14cqi, 2.125rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums lining-nums;
   overflow-wrap: normal;
+}
+
+.dui-kpi-delta {
+  display: inline-block;
+  margin-left: 0.4rem;
+  vertical-align: 0.3em;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.dui-kpi-spark {
+  display: block;
+  width: 100%;
+  height: 1.75rem;
+  margin-top: 0.35rem;
+}
+
+.dui-kpi-spark > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
 }
 
 // Sidebar layout. Below lg the nav is the same drawer (.offcanvas-lg keeps the
@@ -111,6 +240,8 @@ $dui-tabbar-height: 3.75rem;
   align-items: stretch;
   height: calc(#{$dui-tabbar-height} + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
   background-color: var(--bs-body-bg);
   border-top: 1px solid var(--bs-border-color);
 }

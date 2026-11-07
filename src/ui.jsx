@@ -39,15 +39,42 @@ export function Panel({ eyebrow, extra, children, id, alarm = false, className =
   );
 }
 
-export function Kpis({ children, className = "row-cols-2 row-cols-md-4" }) {
-  return <div className={`row g-3 ${className}`}>{children}</div>;
+/**
+ * A row of Kpi tiles: a grid that fits as many as the row is wide, each at
+ * least `min` wide (default 9rem, set in the stylesheet), measured against the
+ * row itself rather than the viewport.
+ */
+export function Kpis({ children, className = "", min }) {
+  return (
+    <div className={`dui-kpis ${className}`} style={min ? { "--dui-kpi-min": min } : undefined}>
+      {children}
+    </div>
+  );
 }
 
-export function Kpi({ label, value, tone, hint }) {
+/**
+ * One figure with its label. `delta` is a percent change, shown as a
+ * DeltaBadge (a number; null means "new"), or any element to show in its
+ * place; `deltaGoodWhen` says which direction is good ("down" by default, as
+ * for spending). `spark` is a small chart drawn under the figure, hidden from
+ * assistive tech: the figure and delta carry the meaning.
+ */
+export function Kpi({ label, value, tone, hint, delta, deltaGoodWhen = "down", spark }) {
+  let badge = null;
+  if (typeof delta === "number" || delta === null) badge = <DeltaBadge pct={delta} goodWhen={deltaGoodWhen} />;
+  else if (delta !== undefined) badge = delta;
   return (
-    <div className="col">
+    <div className="dui-kpi">
       <Eyebrow>{label}</Eyebrow>
-      <div className={`dui-kpi-value fs-5 font-monospace ${toneClass(tone)}`}>{value}</div>
+      <div className={`dui-kpi-value ${toneClass(tone)}`}>
+        {value}
+        {badge ? <span className="dui-kpi-delta">{badge}</span> : null}
+      </div>
+      {spark ? (
+        <div className="dui-kpi-spark" aria-hidden="true">
+          {spark}
+        </div>
+      ) : null}
       {hint ? <div className="small text-body-secondary">{hint}</div> : null}
     </div>
   );
@@ -81,20 +108,25 @@ export function CenterState({ title, children, loading = false, error = false })
   );
 }
 
-export function DeltaBadge({ pct }) {
+/**
+ * A percent change. A rise is bad by default (spending, debt); pass
+ * `goodWhen="up"` for income, balances and returns.
+ */
+export function DeltaBadge({ pct, goodWhen = "down" }) {
   if (pct == null) {
     return <Badge bg="secondary-subtle" text="secondary-emphasis">new</Badge>;
   }
   // Past half a percent the rounded figure is at least 1 either way, so the
   // sign is always there to show.
   const r = Math.round(pct);
-  if (pct > 0.5) {
-    return <Badge bg="danger-subtle" text="danger-emphasis">{`+${r}%`}</Badge>;
+  const up = pct > 0.5;
+  const down = pct < -0.5;
+  if (!up && !down) {
+    return <Badge bg="secondary-subtle" text="secondary-emphasis">—</Badge>;
   }
-  if (pct < -0.5) {
-    return <Badge bg="success-subtle" text="success-emphasis">{`−${-r}%`}</Badge>;
-  }
-  return <Badge bg="secondary-subtle" text="secondary-emphasis">—</Badge>;
+  const good = goodWhen === "up" ? up : down;
+  const tone = good ? "success" : "danger";
+  return <Badge bg={`${tone}-subtle`} text={`${tone}-emphasis`}>{up ? `+${r}%` : `−${-r}%`}</Badge>;
 }
 
 export function BarRow({ label, amount, pct, extra, active = false }) {
@@ -159,5 +191,6 @@ export function Skeleton({ lines = 3, cards = 1, className = "mb-3" }) {
 export function toneClass(tone) {
   if (tone === "neg") return "text-danger";
   if (tone === "pos") return "text-success";
+  if (tone === "warn") return "text-warning-emphasis";
   return "";
 }
