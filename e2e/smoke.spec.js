@@ -53,6 +53,9 @@ for (const [name, options] of [
         // Bold monospace (a table header over figures) gets the semibold face,
         // not a synthesized bold of the 500.
         const boldMono = await document.fonts.load('700 1em "IBM Plex Mono"');
+        // That load fetches a face the page had not used yet, and the set's
+        // status turns back to "loaded" a task after load() resolves.
+        await document.fonts.ready;
         return { sans: sans.length, mono: mono.length, boldMono: boldMono.map((f) => f.weight).join(), status: document.fonts.status };
       });
       expect(loaded).toEqual({ sans: 1, mono: 1, boldMono: "600", status: "loaded" });
