@@ -17,7 +17,7 @@ pieces the apps had each written for themselves.
 Pin a release. The tarball attached to each GitHub Release is prebuilt:
 
 ```bash
-npm i https://github.com/mdanifo/danifo-ui/releases/download/v0.4.2/danifo-ui-0.4.2.tgz
+npm i https://github.com/mdanifo/danifo-ui/releases/download/v0.5.0/danifo-ui-0.5.0.tgz
 ```
 
 The git tag works too, but then `prepare` runs `vite build` on each install
@@ -25,7 +25,7 @@ of the app, with this repo's devDependencies along for the ride (Playwright
 alone is about 19 MB):
 
 ```bash
-npm i github:mdanifo/danifo-ui#v0.4.2
+npm i github:mdanifo/danifo-ui#v0.5.0
 ```
 
 Do not point an app at `#main`: a library change would then ship with the
@@ -202,7 +202,7 @@ does. A Playwright app's whole job is:
 
 ```yaml
 browser:
-  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.2
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.5.0
   with:
     working-directory: frontend
 ```
@@ -215,7 +215,7 @@ and installs the same one:
 
 ```yaml
 browser:
-  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.4.2
+  uses: mdanifo/danifo-ui/.github/workflows/browser-tests.yml@v0.5.0
   with:
     playwright-version: "1.64.1"
     python-version: "3.12"
